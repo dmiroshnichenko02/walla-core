@@ -58,7 +58,7 @@ if ($timer_duration) {
 						// 	echo '<div class="course-price text-black font-inter font-medium text-[22px]">' . $price_html . '</div>';
 						// }
 						?>
-						<div class="flex flex-col items-start gap-[10px]">
+						<div class="flex flex-col items-start gap-[10px] btn-section">
 							<div class="w-full md:w-auto">
 								<?php
 								use Tutor\Models\CourseModel;
@@ -320,7 +320,6 @@ if ($what_learn_smb): ?>
 	<div class="container m-auto py-5 px-4 md:p-6">
 		<h2 class="font-manrope text-[32px] leading-[40px] font-medium mb-[32px] md:mb-10">This course includes:</h2>
 		<?php
-		// Вставляем стандартный блок Tutor LMS с кнопкой старта/покупки из шаблона.
 		if ( function_exists( 'tutor_load_template' ) ) {
 			tutor_load_template( 'single.course.course-entry-box' );
 		}
@@ -980,29 +979,26 @@ if ($faqs): ?>
 				return n < 10 ? '0' + n : n;
 			}
 			
-			// Находим все таймеры на странице курса
 			var courseTimers = document.querySelectorAll('[id^="course-timer-"]');
 			if (courseTimers.length === 0) return;
 			
-			var duration = <?php echo $timer_duration_seconds; ?>; // Длительность в секундах
+			var duration = <?php echo $timer_duration_seconds; ?>
 			var cookieName = 'timer_start_time';
 			var startTime;
 			
-			// Получаем время начала из куки или создаем новое
 			var startTimeCookie = getCookie(cookieName);
 			if (startTimeCookie) {
 				startTime = parseInt(startTimeCookie);
 			} else {
 				startTime = Math.floor(Date.now() / 1000);
-				setCookie(cookieName, startTime.toString(), 7); // Сохраняем на 7 дней
+				setCookie(cookieName, startTime.toString(), 7);
 			}
 			
 			function updateCountdown() {
 				var now = Math.floor(Date.now() / 1000);
 				var elapsed = now - startTime;
 				var remaining = duration - (elapsed % duration);
-				
-				// Если таймер закончился, сбрасываем время начала
+
 				if (elapsed >= duration && elapsed % duration === 0) {
 					startTime = now;
 					setCookie(cookieName, startTime.toString(), 7);
@@ -1015,13 +1011,11 @@ if ($faqs): ?>
 				
 				var timeString = pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
 				
-				// Обновляем все таймеры на странице
 				courseTimers.forEach(function(timer) {
 					timer.textContent = timeString;
 				});
 			}
-			
-			// Функции для работы с куки
+
 			function setCookie(name, value, days) {
 				var expires = "";
 				if (days) {
@@ -1048,5 +1042,22 @@ if ($faqs): ?>
 		});
 	</script>
 <?php endif; ?>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		const btnSection = document.querySelector(".btn-section");
+		if (btnSection) {
+			function validateBtnTextValue() {
+			const btnTextValueWhileTrim = btnSection.querySelector(".tutor-btn").textContent.trim().toLocaleLowerCase();
+			if (btnTextValueWhileTrim === "view cart") {
+				btnSection.querySelector("a").textContent = "View Checkout";
+				}
+			}
+			validateBtnTextValue();
+			setInterval(validateBtnTextValue, 15000);
+			
+		}
+	});
+</script>
 
 <?php get_footer(); ?>

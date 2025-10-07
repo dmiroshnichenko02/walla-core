@@ -34,7 +34,7 @@ if ($timer_duration) {
 	<link rel="profile" href="https://gmpg.org/xfn/11">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Roboto:ital,wght@0,100..900;1,100..900&family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Roboto:ital,wght@0,100..900;1,100..900&family=Figtree:ital,wght@0,300..900;1,300..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 	<style type="text/tailwindcss">
 		@theme {
@@ -53,6 +53,7 @@ if ($timer_duration) {
 			--font-inter: 'Inter', sans-serif;
 			--font-roboto: 'Roboto', sans-serif;
 			--font-figtree: 'Figtree', sans-serif;
+			--font-jost: 'Jost', sans-serif;
 		}
 		@layer utilities {
     	.container {

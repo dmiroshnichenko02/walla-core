@@ -60,6 +60,11 @@
 		line-height: 24px !important;
 		font-family: "Inter", sans-serif !important;
 		margin-bottom: 20px !important;
+		cursor: pointer !important;
+	}
+	.site-footer .wpcf7 input[type="submit"]:hover {
+		background: #d2de09 !important;
+		color: #000 !important;
 	}
 	.site-footer .text {
 		font-family: "Inter", sans-serif !important;
@@ -171,5 +176,120 @@
 <?php wp_footer(); ?>
 
 </body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var rows = document.querySelectorAll('.woocommerce-checkout .form-row');
+
+    if(!rows) return
+
+    function isFilled(el) {
+        if (!el) return false;
+        if (el.tagName === 'SELECT') {
+            return el.value !== '' && el.value !== undefined && el.value !== null;
+        }
+        return (el.value || '').toString().trim().length > 0;
+    }
+
+    function activate(row, active) {
+        if (!row) return;
+        row.classList.toggle('floating-active', !!active);
+    }
+
+    rows.forEach(function(row) {
+        var input = row.querySelector('input.input-text, input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], textarea, select');
+        var label = row.querySelector(':scope > label');
+        if (!input || !label) return;
+
+        // Initialize state
+        activate(row, document.activeElement === input || isFilled(input));
+
+        input.addEventListener('focus', function() { activate(row, true); });
+        input.addEventListener('blur', function() { activate(row, isFilled(input)); });
+        input.addEventListener('input', function() { activate(row, isFilled(input)); });
+        input.addEventListener('change', function() { activate(row, isFilled(input)); });
+    });
+
+    // Handle Select2 widgets if present
+    if (window.jQuery && jQuery.fn && jQuery.fn.select2) {
+        jQuery('.woocommerce-checkout .form-row select').on('select2:open', function(e) {
+            var row = this.closest('.form-row');
+            activate(row, true);
+        });
+        jQuery('.woocommerce-checkout .form-row select').on('select2:close change', function(e) {
+            var row = this.closest('.form-row');
+            activate(row, isFilled(this));
+        });
+    }
+
+    // Explicitly handle address placeholders by ID
+    ['billing_address_1', 'billing_address_2'].forEach(function(id) {
+        var field = document.getElementById(id);
+        if (!field) return;
+        var row = field.closest('.form-row');
+        var label = row ? row.querySelector(':scope > label') : null;
+        var placeholder = field.getAttribute('placeholder') || field.getAttribute('data-placeholder') || '';
+
+        if (label) {
+            if (label.classList.contains('screen-reader-text')) {
+                label.classList.remove('screen-reader-text');
+            }
+            if (placeholder && !label.textContent.trim()) {
+                label.textContent = placeholder;
+            }
+        }
+
+        field.removeAttribute('placeholder');
+        field.setAttribute('data-placeholder', '');
+        activate(row, document.activeElement === field || isFilled(field));
+    });
+
+    // Convert placeholders to labels or remove them
+    document.querySelectorAll('.woocommerce-checkout .form-row input, .woocommerce-checkout .form-row textarea').forEach(function(field) {
+        var row = field.closest('.form-row');
+        if (!row) return;
+        var label = row.querySelector(':scope > label');
+        var placeholder = field.getAttribute('placeholder') || field.getAttribute('data-placeholder') || '';
+
+        // If label exists but is screen-reader only, make it visible and prefer placeholder as text
+        if (label) {
+            if (label.classList.contains('screen-reader-text')) {
+                label.classList.remove('screen-reader-text');
+            }
+            // If placeholder is non-empty and label text is empty or equals placeholder pattern, set to placeholder
+            var labelText = label.textContent.trim();
+            if (placeholder && (!labelText || labelText === placeholder)) {
+                label.textContent = placeholder;
+            }
+        } else if (placeholder) {
+            // Create a label if missing
+            var newLabel = document.createElement('label');
+            var id = field.getAttribute('id');
+            if (id) newLabel.setAttribute('for', id);
+            newLabel.textContent = placeholder;
+            row.insertBefore(newLabel, row.firstChild);
+            label = newLabel;
+        }
+
+        // Remove placeholders so floating label takes over
+        field.setAttribute('data-placeholder', '');
+        field.removeAttribute('placeholder');
+
+        // Re-evaluate floating state after change
+        activate(row, document.activeElement === field || isFilled(field));
+    });
+
+    // Hard remove any remaining placeholders across the entire checkout form
+    document.querySelectorAll('.woocommerce-checkout input, .woocommerce-checkout textarea, .woocommerce-checkout select').forEach(function(el){
+		
+        if (el.hasAttribute('placeholder')) {
+            el.removeAttribute('placeholder');
+        }
+        if (el.hasAttribute('data-placeholder')) {
+            el.setAttribute('data-placeholder', '');
+        }
+    });
+});
+</script>
 
 </html>

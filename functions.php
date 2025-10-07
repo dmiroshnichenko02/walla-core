@@ -222,3 +222,72 @@ add_action('template_redirect', function() {
         }
     }
 });
+
+// Enqueue script + localize
+function my_enqueue_tutor_toggle_script() {
+    $handle = 'tutor-lesson-toggle';
+    wp_enqueue_script(
+        $handle,
+        get_stylesheet_directory_uri() . '/js/lesson-toggle.js',
+        array(),
+        filemtime( get_stylesheet_directory() . '/js/lesson-toggle.js' ),
+        true
+    );
+
+    wp_localize_script(
+        $handle,
+        'tutor_ajax_object',
+        array(
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            // используем один и тот же nonce для всех toggle-ов
+            'nonce'    => wp_create_nonce( 'tutor_toggle_nonce' ),
+        )
+    );
+}
+add_action( 'wp_enqueue_scripts', 'my_enqueue_tutor_toggle_script' );
+
+// Toggle lesson - единый обработчик
+function my_toggle_lesson_completion() {
+    check_ajax_referer( 'tutor_toggle_nonce', 'nonce' );
+
+    $user_id  = get_current_user_id();
+    $lesson_id = intval( $_POST['lesson_id'] ?? 0 );
+    $completed = intval( $_POST['completed'] ?? 0 );
+
+    if ( ! $user_id || ! $lesson_id ) {
+        wp_send_json_error( array( 'message' => 'Invalid data' ) );
+    }
+
+    $meta_key = '_tutor_completed_lesson_id_' . $lesson_id;
+    if ( $completed ) {
+        update_user_meta( $user_id, $meta_key, time() );
+    } else {
+        delete_user_meta( $user_id, $meta_key );
+    }
+
+    wp_send_json_success( array( 'completed' => $completed ) );
+}
+add_action( 'wp_ajax_tutor_toggle_lesson', 'my_toggle_lesson_completion' );
+
+// Toggle quiz - единый обработчик
+function my_toggle_quiz_completion() {
+    check_ajax_referer( 'tutor_toggle_nonce', 'nonce' );
+
+    $user_id = get_current_user_id();
+    $quiz_id = intval( $_POST['quiz_id'] ?? 0 );
+    $completed = intval( $_POST['completed'] ?? 0 );
+
+    if ( ! $user_id || ! $quiz_id ) {
+        wp_send_json_error( array( 'message' => 'Invalid data' ) );
+    }
+
+    $meta_key = '_tutor_completed_quiz_id_' . $quiz_id;
+    if ( $completed ) {
+        update_user_meta( $user_id, $meta_key, time() );
+    } else {
+        delete_user_meta( $user_id, $meta_key );
+    }
+
+    wp_send_json_success( array( 'completed' => $completed ) );
+}
+add_action( 'wp_ajax_tutor_toggle_quiz', 'my_toggle_quiz_completion' );
