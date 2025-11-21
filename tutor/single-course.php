@@ -210,18 +210,16 @@ if ($timer_duration) {
 						<div class="grow px-[6px] min-w-[25%]">
 							<div class="<?php echo $colors[0]; ?> h-full rounded-[16px] p-[18px] flex flex-col min-h-unset md:min-h-[126px] gap-[14px] justify-center">
 								<h3 class="text-black font-inter font-medium text-[20px] leading-5 lg:text-[24px] lg:leading-6">
-									<div class="mt-2 text-[18px] font-inter font-semibold text-black">
-										<?php echo esc_html($avg); ?> out of 5<br>
-										<span class="text-[14px] font-normal text-black/60">Course rating based on <?php echo esc_html($count); ?> ratings</span>
-									</div>
+									★ <?php echo esc_html($avg); ?> out of 5
 								</h3>
+								<p class="font-inter text-[rgba(0,0,0,0.7)] font-medium">Course rating based on <?php echo esc_html($count); ?> ratings</p>
 							</div>
 						</div>
 					<?php
 					endif;
 					foreach ($blocks_smb as $row) {
 						if (empty($row['title']) && empty($row['description'])) continue;
-						//if ($i == 0) { $i++; continue; } // пропускаем первый блок, он уже выведен выше
+						//if ($i == 0) { $i++; continue; }
 					?>
 
 						<?php if (($i % count($colors)) === 3 && $is_free_course) { $i++; continue; } ?>
@@ -237,7 +235,6 @@ if ($timer_duration) {
 								<p class="font-inter text-[rgba(0,0,0,0.7)] font-medium">
 									<?php echo $row['description']; ?>
 									<?php /*if ($i % count($colors) === 2 && $timer_duration_seconds > 0): ?>
-										<!-- Таймер для блока номер 4 (желтого) -->
 										<span class="timer-container mt-2">
 											<span id="course-timer-<?php echo $i; ?>" data-duration="<?php echo esc_attr($timer_duration_seconds); ?>" class="font-inter font-bold text-[18px] text-black"></span>
 										</span>
@@ -285,8 +282,13 @@ if ($what_learn_smb): ?>
 
 			<div class="rounded-[20px] md:rounded-[32px] py-[24px] px-[16px] md:p-[32px] border border-solid border-[#E8E8E8]">
 				<div class="flex justify-between items-center">
+					<?php $toggle_text = get_field('more__less_text');
+					$toggle_labels = explode('/', $toggle_text, 2);
+					$show_text = isset($toggle_labels[0]) ? $toggle_labels[0] : 'Показать ещё';
+					$hide_text = isset($toggle_labels[1]) ? $toggle_labels[1] : 'Скрыть';
+					?>
 					<h2 class="font-manrope text-[32px] leading-[40px] font-medium"><?php echo get_field('what_learn_title'); ?></h2>
-					<span class="toggle flex gap-2 text-[#5C77FF] text-[18px] font-semibold cursor-pointer group"><span class="hidden md:flex"><?php echo get_field('more__less_text'); ?></span><svg class="group-[.active]:rotate-180" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<span class="toggle flex gap-2 text-[#5C77FF] text-[18px] font-semibold cursor-pointer group"><span class="hidden md:flex toggle-label"><?php echo esc_html($show_text); ?></span><svg class="group-[.active]:rotate-180" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M24 12L16 20L8 12" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 						</svg></span>
 				</div>
@@ -297,8 +299,9 @@ if ($what_learn_smb): ?>
 					foreach ($what_learn_smb as $row):
 						$i++;
 						$is_penultimate = ($count % 2 === 0 && $i === $count - 1);
+						$hidden_class = $i > 4 ? ' hidden' : '';
 					?>
-						<li class="w-full md:w-[calc(50%-20px)] relative pl-9 py-4 md:py-[22px] border-unset md:border-b border-solid border-[#EDEDED] <?php echo $is_penultimate ? 'md:nth-last-2:border-b-0' : ''; ?> last:border-b-0">
+						<li class="w-full md:w-[calc(50%-20px)] relative pl-9 py-4 md:py-[22px] border-unset md:border-b border-solid border-[#EDEDED] <?php echo $is_penultimate ? 'md:nth-last-2:border-b-0' : ''; ?> last:border-b-0<?php echo $hidden_class; ?>">
 							<svg class="absolute left-0 top-[25px]" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M16.6663 5L7.49967 14.1667L3.33301 10" stroke="#5C77FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 							</svg>
@@ -314,11 +317,19 @@ if ($what_learn_smb): ?>
 		document.addEventListener("DOMContentLoaded", function() {
 			const toggle = document.querySelector(".toggle");
 			const content = document.querySelector(".toggle-content");
-
-			toggle.addEventListener("click", function() {
-				content.classList.toggle("hidden");
-				toggle.classList.toggle("active");
-			});
+			const label = document.querySelector(".toggle-label");
+			if (toggle && content) {
+				toggle.addEventListener("click", function() {
+					const items = content.querySelectorAll('li');
+					const expanded = toggle.classList.toggle('active');
+					for(let i=4;i<items.length;i++){
+						items[i].classList.toggle('hidden', !expanded);
+					}
+					if(label) {
+						label.textContent = expanded ? "<?php echo esc_js($hide_text); ?>" : "<?php echo esc_js($show_text); ?>";
+					}
+				});
+			}
 		});
 	</script>
 <?php endif; ?>
@@ -837,7 +848,7 @@ if ($immediately_blocks): ?>
 							<img class="mb-4 max-h-[72px] md:max-h-[110px] lg:max-h-[196px]" src="<?php echo $row['icon']; ?>" alt="">
 							<div class="flex flex-col items-start md:items-center gap-4 text-left md:text-center">
 								<h3 class="font-manrope text-[20px] lg:text-[24px] leading-[32px] text-white font-medium max-w-full md:max-w-[310px] m-0 md:m-auto"><?php echo $row['title']; ?></h3>
-								<p class="text-white/70 text-[12px] md:text-[16px] font-inter font-medium"><?php echo $row['description']; ?></p>
+								<p class="text-white/70 text-[12px] md:text-[16px] font-inter font-normal"><?php echo $row['description']; ?></p>
 							</div>
 						</div>
 					<?php endforeach; ?>
