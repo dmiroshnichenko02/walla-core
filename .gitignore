@@ -18,7 +18,6 @@ Thumbs.db
 *.tmp
 *.temp
 
-/dist/
 /build/
 
 .idea/

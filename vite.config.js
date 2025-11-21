@@ -3,25 +3,25 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
 	css: {
-		postcss: './postcss.config.cjs',
+		postcss: './postcss.config.cjs'
 	},
 	build: {
-		outDir: 'assets',
+		outDir: 'dist',
 		emptyOutDir: false,
 		minify: 'terser',
 		terserOptions: {
 			compress: {
 				drop_console: false,
-				drop_debugger: true,
+				drop_debugger: true
 			},
-			mangle: true,
+			mangle: true
 		},
 		cssMinify: false,
 		rollupOptions: {
 			input: {
 				'js/main': resolve(__dirname, 'src/js/main.js'),
 
-				'css/index': resolve(__dirname, 'src/scss/index.scss'),
+				'css/index': resolve(__dirname, 'src/scss/index.scss')
 			},
 			output: {
 				format: 'es',
@@ -31,9 +31,9 @@ export default defineConfig({
 					if (/\.(css)$/.test(name ?? '')) {
 						return '[name][extname]'
 					}
-					return 'assets/[name][extname]'
-				},
-			},
-		},
-	},
+					return 'dist/[name][extname]'
+				}
+			}
+		}
+	}
 })
