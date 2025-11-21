@@ -208,14 +208,18 @@
   padding-left: 74px;
 }
 
-.tutor-course-single-content-wrapper .tutor-accordion-item-header:first-child {
+.tutor-course-single-sidebar-wrapper .tutor-course-topic:first-child .tutor-accordion-item-header:first-child {
   background: #F4F4F4 !important;
   border: none !important;
-  border-radius: 24px 24px 0 0;
+  border-radius: 24px 24px 0 0 !important;
 }
 
-.tutor-course-single-content-wrapper .tutor-accordion-item-header:last-child {
-  border-radius: 24px !important;
+.tutor-course-single-sidebar-wrapper .tutor-course-topic:last-child .tutor-accordion-item-header {
+  border-radius: 0 0 24px 24px !important;
+}
+
+.tutor-course-single-sidebar-wrapper .tutor-course-topic:last-child .tutor-accordion-item-header.is-active {
+  border-radius: 0px !important;
 }
 
 .tutor-course-single-content-wrapper .tutor-course-single-sidebar-title {

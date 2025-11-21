@@ -12,7 +12,6 @@ use Tutor\Models\CourseModel;
 
 global $previous_id;
 
-// Get the ID of this content and the corresponding course.
 $course_content_id     = get_the_ID();
 $course_id             = tutor_utils()->get_course_id_by_subcontent( $course_content_id );
 $content_id            = tutor_utils()->get_post_id( $course_content_id );
@@ -22,6 +21,16 @@ $course                = CourseModel::get_course_by_quiz( get_the_ID() );
 $enable_spotlight_mode = tutor_utils()->get_option( 'enable_spotlight_mode' );
 $quiz_id = get_the_ID();
 $user_id = get_current_user_id();
+
+$_is_preview = get_post_meta( $course_content_id, '_is_preview', true );
+
+if ( ! $_is_preview ) {
+	$theme_modal = get_stylesheet_directory() . '/tutor/modal/enroll-required.php';
+	if ( file_exists( $theme_modal ) ) {
+		include $theme_modal;
+	}
+	die;
+}
 ob_start();
 ?>
 <input type="hidden" name="tutor_quiz_id" id="tutor_quiz_id" value="<?php the_ID(); ?>">
