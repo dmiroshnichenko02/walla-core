@@ -399,3 +399,9 @@ html:has(.tutor-dashboard) {
 .woocommerce-form-coupon-toggle {
   display: none !important;
 }
+
+.woocommerce-Price-amount bdi {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  font-weight: 500;
+}
