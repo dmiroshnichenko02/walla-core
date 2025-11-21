@@ -75,7 +75,6 @@ if ($timer_duration) {
 								$price                = apply_filters( 'get_tutor_course_price', null, $course_id );
 								$lesson_url           = tutor_utils()->get_course_first_lesson();
 
-								// DEBUG: only for admins to inspect button logic variables
 								if ( current_user_can('manage_options') ) {
 								    $debug_product_id = function_exists('tutor_utils') ? tutor_utils()->get_course_product_id() : 0;
 								    $debug_product    = function_exists('wc_get_product') ? wc_get_product( $debug_product_id ) : null;
@@ -115,7 +114,6 @@ if ($timer_duration) {
 								        }
 								    }
 								}
-								// Публичный курс (не платный, не требует записи)
 								elseif ( $is_public && $is_enrolled) {
 									
 								    $first_lesson_url = tutor_utils()->get_course_first_lesson( $course_id, tutor()->lesson_post_type );
@@ -128,11 +126,9 @@ if ($timer_duration) {
 								    </a>
 								    <?php
 								}
-								// Платный курс, не куплен — WooCommerce/EDD кнопка
 								elseif ( $is_purchasable && $price && $tutor_course_sell_by ) {
 								    tutor_load_template( 'single.course.add-to-cart-' . $tutor_course_sell_by );
 								}
-								// Бесплатный курс, не записан
 								elseif (!is_user_logged_in()) { ?>
 									<a href="/dashboard" class="tutor-btn tutor-btn-primary tutor-btn-lg tutor-btn-block tutor-mt-24 tutor-enroll-course-button">
 										<?php esc_html_e('Enroll Now', 'tutor'); ?>
@@ -192,11 +188,9 @@ if ($timer_duration) {
 					$colors = [
 						'bg-white',
 						'bg-white',
-						//'bg-white',
 						'bg-p2'
 					];
 					$course_rating = function_exists('tutor_utils') ? tutor_utils()->get_course_rating($course_id) : false;
-					// Tutor LMS pricing info for discount block
 					$price_info   = function_exists('tutor_utils') ? tutor_utils()->get_raw_course_price($course_id) : null;
 					$regular_price = $price_info ? (float) ($price_info->regular_price ?? 0) : 0;
 					$sale_price    = $price_info ? (float) ($price_info->sale_price ?? 0) : 0;
@@ -219,7 +213,6 @@ if ($timer_duration) {
 					endif;
 					foreach ($blocks_smb as $row) {
 						if (empty($row['title']) && empty($row['description'])) continue;
-						//if ($i == 0) { $i++; continue; }
 					?>
 
 						<?php if (($i % count($colors)) === 3 && $is_free_course) { $i++; continue; } ?>
@@ -534,17 +527,59 @@ if ($what_learn_smb): ?>
 										<?php
 										$current_lesson_id = get_the_ID();
 										$is_current_lesson = false;
+										$post_type = get_post_type($current_lesson_id);
 										$video = function_exists('tutor_utils') ? tutor_utils()->get_video_info() : false;
-										$duration = ($video && !empty($video->playtime) && $video->playtime !== '00:00') ? $video->playtime : '';
-										$is_completed = function_exists('tutor_utils') ? tutor_utils()->is_completed_lesson($current_lesson_id) : false;
+										$has_video = $video && !empty($video->playtime) && $video->playtime !== '00:00';
+										$duration = $has_video ? $video->playtime : '';
+										$is_preview = (bool) get_post_meta($current_lesson_id, '_is_preview', true);
+										$is_completed = false;
+										$is_user_logged_in = is_user_logged_in();
+										
+										if ($is_user_logged_in && function_exists('tutor_utils')) {
+											if ($post_type === 'tutor_quiz') {
+												if (class_exists('Tutor\Models\QuizModel')) {
+													$is_completed = \Tutor\Models\QuizModel::is_quiz_passed($current_lesson_id, get_current_user_id());
+												}
+											} else {
+												$is_completed = tutor_utils()->is_completed_lesson($current_lesson_id);
+											}
+										}
+										
+										$lesson_title_class = 'lesson-title font-inter font-medium';
+										$icon_color = '#666666';
+										
+										if ($is_completed && $is_user_logged_in) {
+											$lesson_title_class .= ' text-green-500';
+											$icon_color = '#22c55e';
+										} elseif ($is_preview) {
+											$lesson_title_class .= ' text-[#5C77FF]';
+											$icon_color = '#5C77FF';
+										}
+										
+										$icon_type = 'video';
+										if ($post_type === 'tutor_quiz') {
+											$icon_type = 'quiz';
+										} elseif (!$has_video) {
+											$icon_type = 'document';
+										}
 										?>
 
 										<a href="<?php echo esc_url(get_permalink($current_lesson_id)); ?>" class="lesson-item <?php echo $is_current_lesson ? 'active' : ''; ?> flex items-center justify-between bg-white px-3 py-5 md:px-[34px]">
 											<div class="lesson-info flex items-center gap-2 md:gap-4">
-												<svg class="lesson-icon w-[18px] md:w-[20px]" fill="#666666" viewBox="0 0 20 20">
-													<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
-												</svg>
-												<span class="lesson-title font-inter font-medium"><?php the_title(); ?></span>
+												<?php if ($icon_type === 'quiz'): ?>
+													<svg class="lesson-icon w-[18px] md:w-[20px]" fill="<?php echo esc_attr($icon_color); ?>" viewBox="0 0 20 20">
+														<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+													</svg>
+												<?php elseif ($icon_type === 'document'): ?>
+													<svg class="lesson-icon w-[18px] md:w-[20px]" fill="<?php echo esc_attr($icon_color); ?>" viewBox="0 0 20 20">
+														<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+													</svg>
+												<?php else: ?>
+													<svg class="lesson-icon w-[18px] md:w-[20px]" fill="<?php echo esc_attr($icon_color); ?>" viewBox="0 0 20 20">
+														<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+													</svg>
+												<?php endif; ?>
+												<span class="<?php echo esc_attr($lesson_title_class); ?>"><?php the_title(); ?></span>
 											</div>
 											<?php if ($duration !== ''): ?>
 											<span class="lesson-duration font-inter font-medium"><?php echo esc_html($duration); ?></span>

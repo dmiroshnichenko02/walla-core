@@ -112,7 +112,6 @@ if ( $topics->have_posts() ) {
 				<?php
 				do_action( 'tutor/lesson_list/before/topic', $topic_id );
 
-				// Loop through lesson, quiz, assignment, zoom lesson.
 				while ( $lessons->have_posts() ) {
 					$lessons->the_post();
 

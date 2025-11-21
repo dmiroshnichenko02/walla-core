@@ -19,7 +19,6 @@ global $post;
 global $previous_id;
 global $next_id;
 
-// Get the ID of this content and the corresponding course.
 $course_content_id = get_the_ID();
 $course_id         = tutor_utils()->get_course_id_by_subcontent( $course_content_id );
 
@@ -33,8 +32,12 @@ $prev_is_preview = get_post_meta( $previous_id, '_is_preview', true );
 $next_is_preview = get_post_meta( $next_id, '_is_preview', true );
 $is_enrolled     = tutor_utils()->is_enrolled( $course_id );
 $is_public       = get_post_meta( $course_id, '_tutor_is_public_course', true ) == 'yes';
-if ( ! $is_enrolled) {
-    echo '<script>window.location.href = "' . esc_url(get_permalink( $course_id )) . '";</script>';
+
+if ( ! $_is_preview ) {
+    $theme_modal = get_stylesheet_directory() . '/tutor/modal/enroll-required.php';
+    if ( file_exists( $theme_modal ) ) {
+        include $theme_modal;
+    }
     die;
 }
 
@@ -51,7 +54,7 @@ if ( $best_watch_time > 0 ) {
 	$json_data['best_watch_time'] = $best_watch_time;
 }
 
-$is_comment_enabled = tutor_utils()->get_option( 'enable_comment_for_lesson' ) && comments_open() && is_user_logged_in();
+$is_comment_enabled = tutor_utils()->get_option( 'enable_comment_for_lesson' ) && comments_open() && ( is_user_logged_in() || $_is_preview );
 
 ?>
 
@@ -67,7 +70,6 @@ tutor_load_template(
 );
 ?>
 <div class="tutor-course-topic-single-body">
-	<!-- Load Lesson Video -->
 	<?php
 		$video_info = tutor_utils()->get_video_info();
 		$source_key = is_object( $video_info ) && 'html5' !== $video_info->source ? 'source_' . $video_info->source : null;
