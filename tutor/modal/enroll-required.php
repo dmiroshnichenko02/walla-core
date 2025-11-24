@@ -18,7 +18,6 @@ if (function_exists('tutor_utils')) {
 	$register_url = tutor_utils()->student_register_url();
 }
 
-// Получаем информацию о курсе
 $course_price = '';
 $is_purchasable = false;
 $tutor_course_sell_by = '';

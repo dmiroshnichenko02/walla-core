@@ -33,12 +33,12 @@ $next_is_preview = get_post_meta( $next_id, '_is_preview', true );
 $is_enrolled     = tutor_utils()->is_enrolled( $course_id );
 $is_public       = get_post_meta( $course_id, '_tutor_is_public_course', true ) == 'yes';
 
-if ( ! $_is_preview ) {
+if ( ! $_is_preview && ! $is_enrolled ) {
     $theme_modal = get_stylesheet_directory() . '/tutor/modal/enroll-required.php';
     if ( file_exists( $theme_modal ) ) {
         include $theme_modal;
     }
-    die;
+    return;
 }
 
 $prev_is_locked = ! ( $is_enrolled || $prev_is_preview || $is_public );
@@ -224,28 +224,24 @@ tutor_load_template(
 
 	<div class="tutor-course-spotlight-wrapper">
 		<ul class="tutor-nav tutor-course-spotlight-nav tutor-justify-center">
-			<?php if ( $has_lesson_content && ( $has_lesson_attachment || $is_comment_enabled ) ) : ?>
 			<li class="tutor-nav-item">
-				<a href="#" class="tutor-nav-link<?php echo 'overview' == $page_tab ? ' is-active' : ''; ?>" data-tutor-nav-target="tutor-course-spotlight-overview" data-tutor-query-variable="page_tab" data-tutor-query-value="overview">
+				<a href="#" class="tutor-nav-link<?php echo 'overview' == $page_tab || empty( $page_tab ) ? ' is-active' : ''; ?>" data-tutor-nav-target="tutor-course-spotlight-overview" data-tutor-query-variable="page_tab" data-tutor-query-value="overview">
 					<span class="tutor-icon-document-text tutor-mr-8" area-hidden="true"></span>
 					<span><?php esc_html_e( 'About', 'tutor' ); ?></span>
 				</a>
 			</li>
-			<?php endif; ?>
 			
-			<?php if ( $has_lesson_attachment && ( $has_lesson_content || $is_comment_enabled ) ) : ?>
 			<li class="tutor-nav-item">
-				<a href="#" class="tutor-nav-link<?php echo ( 'files' == $page_tab || false === $has_lesson_content ) ? ' is-active' : ''; ?>" data-tutor-nav-target="tutor-course-spotlight-files" data-tutor-query-variable="page_tab" data-tutor-query-value="files">
+				<a href="#" class="tutor-nav-link<?php echo 'files' == $page_tab ? ' is-active' : ''; ?>" data-tutor-nav-target="tutor-course-spotlight-files" data-tutor-query-variable="page_tab" data-tutor-query-value="files">
 					<span class="tutor-icon-paperclip tutor-mr-8" area-hidden="true"></span>
 					<span><?php esc_html_e( 'Study Materials', 'tutor' ); ?></span>
 				</a>
 			</li>
-			<?php endif; ?>
 
-			<?php if ( $is_comment_enabled && ( $has_lesson_content || $has_lesson_attachment ) ) : ?>
+			<?php if ( $is_comment_enabled ) : ?>
 			<li class="tutor-nav-item">
 				<a  href="#" 
-					class="tutor-nav-link<?php echo ( 'comments' == $page_tab || ( false === $has_lesson_content && false === $has_lesson_attachment ) ) ? ' is-active' : ''; ?>" 
+					class="tutor-nav-link<?php echo 'comments' == $page_tab ? ' is-active' : ''; ?>" 
 					data-tutor-nav-target="tutor-course-spotlight-comments" data-tutor-query-variable="page_tab" 
 					data-tutor-query-value="comments">
 					
@@ -254,10 +250,10 @@ tutor_load_template(
 				</a>
 			</li>
 			<?php endif; ?>
-			<?php if ( true ) : ?>
+			
 			<li class="tutor-nav-item">
 				<a  href="#" 
-					class="tutor-nav-link<?php echo ( 'reviews' == $page_tab || ( false === $has_lesson_content && false === $has_lesson_attachment ) ) ? ' is-active' : ''; ?>" 
+					class="tutor-nav-link<?php echo 'reviews' == $page_tab ? ' is-active' : ''; ?>" 
 					data-tutor-nav-target="tutor-course-spotlight-reviews" data-tutor-query-variable="page_tab" 
 					data-tutor-query-value="reviews">
 					
@@ -265,12 +261,10 @@ tutor_load_template(
 					<span><?php esc_html_e( 'Review', 'tutor' ); ?></span>
 				</a>
 			</li>
-			<?php endif; ?>
 		</ul>
 
 		<div class="tutor-tab tutor-course-spotlight-tab">
-			<?php if ( $has_lesson_content ) : ?>
-			<div id="tutor-course-spotlight-overview" class="tutor-tab-item<?php echo 'overview' == $page_tab ? esc_attr( ' is-active' ) : esc_attr( '' ); ?>">
+			<div id="tutor-course-spotlight-overview" class="tutor-tab-item<?php echo 'overview' == $page_tab || empty( $page_tab ) ? esc_attr( ' is-active' ) : esc_attr( '' ); ?>">
 				<div class="tutor-container">
 					<div class="tutor-row tutor-justify-center">
 						<div class="tutor-col-xl-8">
@@ -282,10 +276,8 @@ tutor_load_template(
 					</div>
 				</div>
 			</div>
-			<?php endif; ?>
 
-			<?php if ( $has_lesson_attachment ) : ?>
-			<div id="tutor-course-spotlight-files" class="tutor-tab-item<?php echo esc_attr( ( 'files' == $page_tab || false === $has_lesson_content ) ? ' is-active' : '' ); ?>">
+			<div id="tutor-course-spotlight-files" class="tutor-tab-item<?php echo esc_attr( 'files' == $page_tab ? ' is-active' : '' ); ?>">
 				<div class="tutor-container">
 					<div class="tutor-row tutor-justify-center">
 						<div class="tutor-col-xl-8">
@@ -295,10 +287,9 @@ tutor_load_template(
 					</div>
 				</div>
 			</div>
-			<?php endif; ?>
 			
 			<?php if ( $is_comment_enabled ) : ?>
-			<div id="tutor-course-spotlight-comments" class="tutor-tab-item<?php echo esc_attr( ( 'comments' == $page_tab || ( false === $has_lesson_content && false === $has_lesson_attachment ) ) ? ' is-active' : '' ); ?>">
+			<div id="tutor-course-spotlight-comments" class="tutor-tab-item<?php echo esc_attr( 'comments' == $page_tab ? ' is-active' : '' ); ?>">
 				<div class="tutor-container">
 					<div class="tutor-course-spotlight-comments">
 						<?php require __DIR__ . '/comment.php'; ?>
@@ -307,7 +298,7 @@ tutor_load_template(
 			</div>
 			<?php endif; ?>
 
-			<div id="tutor-course-spotlight-reviews" class="tutor-tab-item<?php echo esc_attr( ( 'reviews' == $page_tab ) ? ' is-active' : '' ); ?>">
+			<div id="tutor-course-spotlight-reviews" class="tutor-tab-item<?php echo esc_attr( 'reviews' == $page_tab ? ' is-active' : '' ); ?>">
 				<div class="tutor-container">
 					<div class="tutor-row tutor-justify-center">
 						<div class="tutor-col-xl-8">

@@ -339,4 +339,3 @@ if ( $topics->have_posts() ) {
 }
 ?>
 <?php do_action( 'tutor_lesson/single/after/lesson_sidebar' ); ?>
-

@@ -304,3 +304,51 @@ document.addEventListener('DOMContentLoaded', function () {
   // console.log('Tutor video tracker initialized:', { postId, requiredPct, configuredDuration });
 });
 
+document.addEventListener("DOMContentLoaded", function() {
+	function updateBorderRadius() {
+		const topics = document.querySelectorAll(".tutor-course-single-sidebar-wrapper .tutor-course-topic .tutor-accordion-item-header");
+		if (topics.length === 0) return;
+		
+		const firstHeader = topics[0];
+		const lastHeader = topics[topics.length - 1];
+		
+		if (topics.length === 1) {
+			if (firstHeader.classList.contains('is-active')) {
+				firstHeader.style.setProperty("border-radius", "24px 24px 0px 0px", "important");
+			} else {
+				firstHeader.style.setProperty("border-radius", "24px", "important");
+			}
+			return;
+		}
+		
+		firstHeader.style.setProperty("border-radius", "24px 24px 0 0", "important");
+    
+		if (lastHeader.classList.contains('is-active')) {
+			lastHeader.style.setProperty("border-radius", "0px", "important");
+		} else {
+			lastHeader.style.setProperty("border-radius", "0 0 24px 24px", "important");
+		}
+	}
+	
+	updateBorderRadius();
+	
+	const observer = new MutationObserver(function(mutations) {
+		mutations.forEach(function(mutation) {
+			if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+				const target = mutation.target;
+				if (target.classList.contains('tutor-accordion-item-header')) {
+					updateBorderRadius();
+				}
+			}
+		});
+	});
+	
+	const sidebar = document.querySelector('.tutor-course-single-sidebar-wrapper');
+	if (sidebar) {
+		observer.observe(sidebar, {
+			attributes: true,
+			attributeFilter: ['class'],
+			subtree: true
+		});
+	}
+});
