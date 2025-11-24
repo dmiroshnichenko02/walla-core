@@ -25,11 +25,13 @@ $user_id = get_current_user_id();
 $_is_preview = get_post_meta( $course_content_id, '_is_preview', true );
 
 if ( ! $_is_preview ) {
+	get_tutor_header();
 	$theme_modal = get_stylesheet_directory() . '/tutor/modal/enroll-required.php';
 	if ( file_exists( $theme_modal ) ) {
 		include $theme_modal;
 	}
-	die;
+	get_tutor_footer();
+	return;
 }
 ob_start();
 ?>
