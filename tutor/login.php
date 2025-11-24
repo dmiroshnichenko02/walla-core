@@ -27,7 +27,7 @@ $login_url = tutor_utils()->get_option( 'enable_tutor_native_login', null, true,
 do_action( 'tutor/template/login/before/wrap' );
 ?>
 <style>
-	.walla-auth__container{display:grid;grid-template-columns:1.5fr 2fr;gap:40px;align-items:stretch;min-height:80vh;padding:40px 0;box-sizing:border-box}
+	.walla-auth__container{display:grid;grid-template-columns:1.5fr 2fr;gap:40px;align-items:stretch;padding:40px 0;box-sizing:border-box}
 	.walla-auth__left{background:#F6F6F6;border-radius:20px;padding:60px 42px;display:flex;flex-direction:column;justify-content:center}
 	/* .walla-auth__right{background:#ff2e2e;border-radius:16px} */
 	.walla-auth .tutor-login-form-wrapper .tutor-fs-5{font-size:28px;font-weight:700;margin-bottom:24px; padding: 0 !important;}
