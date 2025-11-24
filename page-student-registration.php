@@ -8,8 +8,8 @@
 get_header(); ?>
 
 <style>
-    .walla-auth__container{display:grid;grid-template-columns:1.5fr 2fr;gap:40px;align-items:stretch;min-height:80vh;padding:40px 0;box-sizing:border-box}
-    .walla-auth__left{background:#F6F6F6;border-radius:20px;padding:60px 42px;display:flex;flex-direction:column;justify-content:center}
+    .walla-auth__container{display:grid;grid-template-columns:1.5fr 2fr;gap:40px;align-items:stretch;padding:40px 0;box-sizing:border-box}
+    .walla-auth__left{background:#F6F6F6;border-radius:20px;padding:20px 42px;display:flex;flex-direction:column;justify-content:center}
     .walla-auth input.tutor-form-control{height:52px;border-radius:28px;background:#fff;border:1px solid #e6e7eb;padding:0 18px;box-shadow:none}
     .walla-auth .lgn-btn{background:#000;color:#fff;width:100%;border-radius:200px;padding:20px;display:flex;justify-content:center;align-items:center}
     .walla-auth .lgn-btn:hover{background:#1D1F1E;color:#fff}
