@@ -7,7 +7,7 @@
 
 			<div class="py-5 md:py-12 px-5 md:px-10 max-w-full md:max-w-[600px]">
 				<h1 class="font-manrope text-[32px] leading-[40px] lg:text-[48px] lg:leading-[58px] font-medium mb-4"><?php echo get_field('title_hero'); ?></h1>
-				<div class="font-inter font-medium text-[16px] text-black/70 mb-4 md:mb-12.5"><?php echo get_field('text_hero'); ?></div>
+				<div class="font-inter font-medium text-[16px] text-black/70 mb-4 md:mb-12"><?php echo get_field('text_hero'); ?></div>
 				<?php 
 				$link = get_field('button_hero');
 				if( $link ): 
@@ -31,16 +31,16 @@
 <?php
 $blocks_b = get_field('blocks_b');
 if ($blocks_b): ?>
-<section class="py-[27px] md:py-15 px-4">
+<section class="py-[27px] md:py-14 px-4">
 	<div class="container m-auto">
 
 		<h2 class="font-manrope text-center text-[32px] leading-[40px] lg:text-[48px] lg:leading-[58px] font-medium mb-4"><?php echo get_field('title_b'); ?></h2>
-		<div class="font-inter text-center font-medium text-[18px] text-black/60 mb-12.5"><?php echo get_field('text_b'); ?></div>
+		<div class="font-inter text-center font-medium text-[18px] text-black/60 mb-12"><?php echo get_field('text_b'); ?></div>
 
 		<div class="flex flex-wrap md:flex-nowrap gap-5">
 		<?php foreach ($blocks_b as $row): ?>
-			<div class="w-full w-1/3 text-center py-10.5 px-3 md:p-3 rounded-[20px] md:rounded-[22px] bg-[#F7F7F7]">
-				<img class="h-[146px] m-auto mb-12.5" src="<?php echo $row['img']; ?>" alt="">
+			<div class="w-full w-1/3 text-center py-10 px-3 md:p-3 rounded-[20px] md:rounded-[22px] bg-[#F7F7F7]">
+				<img class="h-[146px] m-auto mb-12" src="<?php echo $row['img']; ?>" alt="">
 				<h3 class="text-black font-inter font-medium text-[20px] leading-5 lg:text-[24px] lg:leading-6 mb-2"><?php echo $row['title']; ?></h3>
 				<div class="font-inter font-medium text-[16px] text-black/70"><?php echo $row['text']; ?></div>
 			</div>
@@ -63,7 +63,7 @@ if ($blocks_r): ?>
 		<?php $i = 0; foreach ($blocks_r as $row): 
 			$i++;
 			$min_height = ($i === 2) ? 'min-h-[320px]' : 'min-h-[260px]'; ?>
-			<div class="w-full lg:w-1/3 text-center pt-[66px] pb-[32px] px-5 md:p-5 rounded-[20px] md:rounded-[22px] bg-[#F7F7F7] border-1 border-solid border-[rgba(0,0,0,0.08)] <?php echo $min_height; ?> flex flex-col justify-between">
+			<div class="w-full lg:w-1/3 text-center p-5 md:pt-[66px] md:pb-[32px] rounded-[20px] md:rounded-[22px] bg-[#F7F7F7] border-1 border-solid border-[rgba(0,0,0,0.08)] <?php echo $min_height; ?> flex flex-col justify-between">
 				<h3 class="text-black font-roboto font-medium text-[44px] leading-8 mb-4"><?php echo $row['price']; ?></h3>
 				<?php if($row['img']) { ?><img class="h-[280px] m-auto mb-4" src="<?php echo $row['img']; ?>" alt=""><?php } ?>
 				<div class="flex items-center justify-center gap-1">
@@ -85,12 +85,12 @@ if ($blocks_w): ?>
 	<div class="container m-auto">
 
 		<h2 class="font-roboto text-center text-[32px] leading-[40px] lg:text-[48px] lg:leading-[58px] font-medium mb-4"><?php echo get_field('title_w'); ?></h2>
-		<div class="font-inter text-center font-medium text-[18px] text-black/60 mb-12.5"><?php echo get_field('text_w'); ?></div>
+		<div class="font-inter text-center font-medium text-[18px] text-black/60 mb-12"><?php echo get_field('text_w'); ?></div>
 
 		<div class="flex flex-wrap md:flex-nowrap gap-[42px] md:gap-5">
 		<?php foreach ($blocks_w as $row): ?>
 			<div class="w-full w-1/3 text-center px-3 md:px-3">
-				<img class="h-[80px] m-auto mb-12.5" src="<?php echo $row['img']; ?>" alt="">
+				<img class="h-[80px] m-auto mb-12" src="<?php echo $row['img']; ?>" alt="">
 				<h3 class="text-black font-inter font-medium text-[20px] leading-5 lg:text-[24px] lg:leading-6 mb-2"><?php echo $row['title']; ?></h3>
 				<div class="font-inter font-medium text-[16px] text-black/70 mb-5"><?php echo $row['text']; ?></div>
 				<?php 
@@ -111,17 +111,19 @@ if ($blocks_w): ?>
 <?php endif; ?>
 
 <?php
-$teachers_t = get_field('teachers_t');
-if ($teachers_t): ?>
+$teacher_slider = get_field('teacher_slider');
+if ($teacher_slider): ?>
 <section class="py-10 md:py-25 px-4">
 	<div class="container m-auto">
 
-		<h2 class="font-roboto text-left md:text-center text-[32px] leading-[40px] lg:text-[48px] lg:leading-[58px] font-medium max-w-[650px] m-auto mb-5 md:mb-12.5"><?php echo get_field('title_t'); ?></h2>
+		<h2 class="font-roboto text-left md:text-center text-[32px] leading-[40px] lg:text-[48px] lg:leading-[58px] font-medium max-w-[650px] m-auto mb-5 md:mb-12"><?php echo get_field('title_t'); ?></h2>
 
 		<div class="teachers-slider-wrap">
 		<div class="teachers-slider flex flex-col">
-		<?php foreach ($teachers_t as $user): ?>
-		<?php //var_dump($user);
+		<?php foreach ($teacher_slider as $row): ?>
+		<?php 
+		$user = $row['teacher'];
+		if (!$user) continue;
 		$author_id = $user->ID;
 		$author_avatar = get_avatar($author_id, 230, '', '', array('class' => 'w-full max-h-[228px] object-cover'));
 		$author_name   = get_the_author_meta('display_name', $author_id);
@@ -203,7 +205,7 @@ if ($teachers_t): ?>
 		<?php endif; ?>
 		<?php endforeach; ?>
 		</div>
-		<div class="slider-arrows overflow-x-hidden flex justify-center gap-5 mt-8 md:mt-12.5"></div>
+		<div class="slider-arrows overflow-x-hidden flex justify-center gap-5 mt-8 md:mt-12"></div>
 		</div>
 
 	</div>
@@ -287,24 +289,27 @@ if ($teachers_t): ?>
 </style>
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
-		const toggle = document.querySelector(".toggle-author");
-		const authorRight = document.querySelector(".course-author-right");
-		const span = toggle.querySelector("span");
+		const toggles = document.querySelectorAll(".toggle-author");
+		
+		toggles.forEach(function(toggle) {
+			const authorRight = toggle.closest(".course-author-right");
+			const span = toggle.querySelector("span");
 
-		toggle.addEventListener("click", function() {
-			authorRight.classList.toggle("show");
+			toggle.addEventListener("click", function() {
+				authorRight.classList.toggle("show");
 
-			if (authorRight.classList.contains("show")) {
-				span.textContent = "Show Less";
-			} else {
-				span.textContent = "Show More";
-			}
+				if (authorRight.classList.contains("show")) {
+					span.textContent = "Show Less";
+				} else {
+					span.textContent = "Show More";
+				}
+			});
 		});
 	});
 </script>
 <?php endif; ?>
 
-<section class="py-[52px] md:pt-12.5 md:pb-[120px] px-4">
+<section class="py-[52px] md:pt-12 md:pb-[120px] px-4">
 	<div class="container m-auto">
 
 		<div class="flex items-center flex-wrap md:flex-nowrap gap-4">
@@ -341,7 +346,7 @@ if ($teachers_t): ?>
 <section class="pt-0 pb-[52px] md:py-20 px-4">
 	<div class="container m-auto">
 
-		<div class="text-center py-12.5 px-8 rounded-[22px] md:rounded-[36px] bg-[#FF596C]">
+		<div class="text-center py-12 px-8 rounded-[22px] md:rounded-[36px] bg-[#FF596C]">
 
 			<h2 class="font-roboto text-white text-[32px] leading-[40px] lg:text-[48px] lg:leading-[58px] capitalize font-medium max-w-[305px] md:max-w-full m-auto mb-6"><?php echo get_field('title_banner'); ?></h2>
 			<div class="font-inter font-medium text-[18px] text-white capitalize max-w-[464px] m-auto mb-8"><?php echo get_field('text_banner'); ?></div>
