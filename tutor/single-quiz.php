@@ -21,10 +21,10 @@ $course                = CourseModel::get_course_by_quiz( get_the_ID() );
 $enable_spotlight_mode = tutor_utils()->get_option( 'enable_spotlight_mode' );
 $quiz_id = get_the_ID();
 $user_id = get_current_user_id();
-
+$is_enrolled = tutor_utils()->is_enrolled( $course_id );
 $_is_preview = get_post_meta( $course_content_id, '_is_preview', true );
 
-if ( ! $_is_preview ) {
+if ( ! $_is_preview && ! $is_enrolled ) {
 	get_tutor_header();
 	$theme_modal = get_stylesheet_directory() . '/tutor/modal/enroll-required.php';
 	if ( file_exists( $theme_modal ) ) {
