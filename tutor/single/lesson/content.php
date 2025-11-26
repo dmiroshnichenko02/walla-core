@@ -191,8 +191,33 @@ tutor_load_template(
 		</div>
 		<div class="info">
 		<?php
-		if ( function_exists( 'tutor_load_template' ) ) {
-			tutor_load_template( 'single.course.course-entry-box' );
+		if ( function_exists( 'get_field' ) && $course_id ) {
+			$course_includes = get_field( 'course_includes', $course_id );
+			
+			if ( $course_includes && is_array( $course_includes ) ) {
+				?>
+				<div class="course-includes-info" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
+					<?php foreach ( $course_includes as $index => $item ) : 
+						$icon = isset( $item['icon'] ) ? $item['icon'] : '';
+						$text = isset( $item['text'] ) ? $item['text'] : '';
+						
+						if ( ! empty( $icon ) || ! empty( $text ) ) :
+					?>
+						<div class="course-includes-item" style="display: flex; align-items: center; gap: 8px;">
+							<?php if ( ! empty( $icon ) ) : ?>
+								<img src="<?php echo esc_url( $icon ); ?>" alt="" style="width: 20px; height: 20px; object-fit: contain; flex-shrink: 0;" />
+							<?php endif; ?>
+							<?php if ( ! empty( $text ) ) : ?>
+								<span style="font-size: 16px; line-height: 24px; color: #555555; font-family: 'Jost', sans-serif;"><?php echo esc_html( $text ); ?></span>
+							<?php endif; ?>
+						</div>
+					<?php 
+						endif;
+					endforeach; 
+					?>
+				</div>
+				<?php
+			}
 		}
 		?>
 		</div>
