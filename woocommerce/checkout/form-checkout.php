@@ -324,6 +324,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 		.woocommerce-checkout #list_payment_method_abapay_khqr, .woocommerce-checkout #list_payment_method_abapay_khqr label {
 			display: flex !important;
 		}
+
+		/* Hide login form completely */
+		.woocommerce-checkout .woocommerce-form-login {
+			display: none !important;
+		}
+		/* Hide create account checkbox */
+		.woocommerce-checkout .woocommerce-account-fields,
+		.woocommerce-checkout .create-account {
+			display: none !important;
+		}
+
+		.woocommerce-checkout .woocommerce-billing-fields {
+			padding: 20px 10px;
+			border: 1px solid #EFEFEF;
+			border-radius: 12px;
+		}
+
+		.woocommerce-checkout .woocommerce-billing-fields h3 {
+			position: relative;
+			display: inline-block;
+			padding-left: 20px;
+		}
+		.woocommerce-checkout .woocommerce-billing-fields h3::before {
+			content: '1.';
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			width: 24px;
+			height: 24px;
+			font-size: 16px;
+			line-height: 24px;
+			font-weight: 500;
+			font-family: 'Roboto', sans-serif;
+			color: #000;
+			text-align: center;
+		}
+
+		.woocommerce-checkout .woocommerce-billing-fields__field-wrapper {
+			padding: 0 20px;
+		}
 	</style>
 	<div class="flex justify-between gap-8 w-full">
 		<div class="w-full bg-white rounded-[20px] py-10 px-8">
@@ -343,9 +383,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<div class="" id="customer_details">
 						<div class="">
+							<?php wc_get_template( 'checkout/cart-items.php' ); ?>
 							<?php do_action( 'woocommerce_checkout_billing' ); ?>
 							<?php do_action( 'woocommerce_checkout_payment' ); ?>
-							<?php wc_get_template( 'checkout/cart-items.php' ); ?>
+							
 							<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
 							<div id="order_review" class="woocommerce-checkout-review-order">
 								<?php do_action( 'woocommerce_checkout_order_review' ); ?>

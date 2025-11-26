@@ -15,7 +15,7 @@ WC()->payment_gateways()->set_current_gateway( $available_gateways );
 ?>
 
 <div id="payment" class="woocommerce-checkout-payment">
-    <h3 class="text-[#1D1F1E] font-roboto font-medium text-[16px] leading-[24px] mb-3"><?php esc_html_e( 'Choose Payment Method', 'walla' ); ?></h3>
+    <h3 class="text-[#1D1F1E] font-roboto font-medium text-[16px] leading-[24px] mb-3"><?php esc_html_e( '2. Choose Payment Method', 'walla' ); ?></h3>
     <ul class="wc_payment_methods payment_methods methods flex flex-col gap-3">
         <?php if ( ! empty( $available_gateways ) ) : ?>
             <?php foreach ( $available_gateways as $gateway ) : ?>
