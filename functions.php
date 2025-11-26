@@ -344,7 +344,7 @@ function remove_unwanted_billing_fields( $fields ) {
     unset( $fields['billing_address_2'] );
     unset( $fields['billing_postcode'] );
     unset( $fields['billing_city'] );
-    unset( $fields['billing_phone'] );
+    // unset( $fields['billing_phone'] );
     unset( $fields['billing_country'] );
     unset( $fields['billing_state'] );
     // unset( $fields['billing_first_name'] );
@@ -353,18 +353,112 @@ function remove_unwanted_billing_fields( $fields ) {
     return $fields;
 }
 
-add_action( 'woocommerce_checkout_process', function () {
+add_action( 'woocommerce_checkout_process', 'walla_custom_checkout_process' );
+function walla_custom_checkout_process() {
     if ( is_user_logged_in() ) {
         return;
     }
-    $create_account_checked = isset($_POST['createaccount']) && $_POST['createaccount'] == 1;
-    if ( ! $create_account_checked ) {
+    $billing_phone = isset( $_POST['billing_phone'] ) ? sanitize_text_field( $_POST['billing_phone'] ) : '';
+    $billing_email = isset( $_POST['billing_email'] ) ? sanitize_email( $_POST['billing_email'] ) : '';
+    $billing_first_name = isset( $_POST['billing_first_name'] ) ? sanitize_text_field( $_POST['billing_first_name'] ) : '';
+    $billing_last_name = isset( $_POST['billing_last_name'] ) ? sanitize_text_field( $_POST['billing_last_name'] ) : '';
+
+    if ( empty( $billing_phone ) ) {
         wc_add_notice(
-            __('To place an order, please log in to your account or create a new one using the checkbox in the billing section.', 'woocommerce'),
+            __( 'Phone number is required.', 'woocommerce' ),
             'error'
         );
+        return;
     }
-});
+
+    $existing_user = walla_find_user_by_phone( $billing_phone );
+    
+    if ( $existing_user ) {
+        wc_add_notice(
+            __( 'An account with this phone number already exists. Please log in to continue.', 'woocommerce' ),
+            'error'
+        );
+        return;
+    }
+
+    if ( empty( $billing_email ) ) {
+        wc_add_notice(
+            __( 'Email address is required to create an account.', 'woocommerce' ),
+            'error'
+        );
+        return;
+    }
+
+    if ( email_exists( $billing_email ) ) {
+        wc_add_notice(
+            __( 'An account with this email address already exists. Please log in to continue.', 'woocommerce' ),
+            'error'
+        );
+        return;
+    }
+
+    $_POST['createaccount'] = 1;
+}
+
+function walla_find_user_by_phone( $phone ) {
+    if ( empty( $phone ) ) {
+        return false;
+    }
+
+    $users = get_users( array(
+        'meta_key'   => 'billing_phone',
+        'meta_value' => $phone,
+        'number'     => 1,
+        'fields'     => 'ID',
+    ) );
+
+    if ( ! empty( $users ) ) {
+        return $users[0];
+    }
+
+    return false;
+}
+
+add_action( 'woocommerce_created_customer', 'walla_save_customer_phone', 10, 3 );
+function walla_save_customer_phone( $customer_id, $new_customer_data, $password_generated ) {
+    if ( isset( $_POST['billing_phone'] ) && ! empty( $_POST['billing_phone'] ) ) {
+        $phone = sanitize_text_field( $_POST['billing_phone'] );
+        update_user_meta( $customer_id, 'billing_phone', $phone );
+    }
+}
+
+$walla_registered_customer_id = 0;
+
+add_action( 'woocommerce_checkout_update_user_meta', 'walla_disable_auto_login_after_registration', 10, 2 );
+function walla_disable_auto_login_after_registration( $customer_id, $data ) {
+    global $walla_registered_customer_id;
+    
+    if ( $customer_id && ! empty( $data['createaccount'] ) ) {
+        $walla_registered_customer_id = $customer_id;
+        
+        wp_clear_auth_cookie();
+        wp_set_current_user( 0 );
+        
+        if ( function_exists( 'WC' ) && WC()->session ) {
+            WC()->session->set_customer_session_cookie( false );
+        }
+        
+        if ( WC()->session ) {
+            WC()->session->__unset( 'reload_checkout' );
+        }
+    }
+}
+
+add_filter( 'woocommerce_checkout_customer_id', 'walla_set_order_customer_id', 10, 1 );
+function walla_set_order_customer_id( $customer_id ) {
+    global $walla_registered_customer_id;
+    
+    if ( $walla_registered_customer_id > 0 ) {
+        return $walla_registered_customer_id;
+    }
+    
+    return $customer_id;
+}
 
 /**
  * Replace "Add to cart" button text for course products

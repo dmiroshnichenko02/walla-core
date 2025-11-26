@@ -12,9 +12,9 @@ $order         = null;
 $order_id      = isset($_GET['order_id']) ? absint($_GET['order_id']) : 0;
 $order_key     = isset($_GET['order_key']) ? sanitize_text_field(wp_unslash($_GET['order_key'])) : '';
 $can_display   = false;
+$is_registered_not_logged_in = false;
 $error_message = '';
 
-// Получаем ссылку на картинку из опций через ACF поле
 $thank_you_image_url = function_exists('get_field') ? get_field('thank_you_image', 'option') : '';
 
 if ($order_id && $order_key && function_exists('wc_get_order') && class_exists('WC_Order')) {
@@ -24,8 +24,14 @@ if ($order_id && $order_key && function_exists('wc_get_order') && class_exists('
 		$order         = null;
 		$error_message = __('We could not verify your order. Please check the link from your confirmation email.', 'walla');
 	} elseif (! is_user_logged_in()) {
-		$order         = null;
-		$error_message = __('You need to log in to view this order.', 'walla');
+		$order_customer_id = $order->get_customer_id();
+		if ($order_customer_id > 0) {
+			$can_display = true;
+			$is_registered_not_logged_in = true;
+		} else {
+			$order         = null;
+			$error_message = __('You need to log in to view this order.', 'walla');
+		}
 	} else {
 		$current_user_id = get_current_user_id();
 
@@ -41,7 +47,54 @@ if ($order_id && $order_key && function_exists('wc_get_order') && class_exists('
 
 <main class="bg-[#f2f2f5] py-16">
 	<div class="container mx-auto max-w-5xl px-6">
-		<?php if ($can_display && $order) : ?>
+		<?php if ($can_display && $order && $is_registered_not_logged_in) : ?>
+			<section class="rounded-3xl bg-white shadow-xl">
+				<div class="rounded-t-3xl bg-white px-8 py-12 text-center sm:px-16">
+					<h1 class="font-sora text-4xl font-semibold text-gray-900 sm:text-5xl">
+						<?php esc_html_e('Thank You for Your Purchase!', 'walla'); ?>
+					</h1>
+					<div class="mt-8 flex justify-center">
+						<?php if ( !empty($thank_you_image_url) ) : ?>
+							<img
+								src="<?php echo esc_url($thank_you_image_url); ?>"
+								alt="<?php esc_attr_e('Thank you illustration', 'walla'); ?>"
+								class="h-32 w-32 sm:h-40 sm:w-40"
+							/>
+						<?php endif; ?>
+					</div>
+				</div>
+
+				<div class="border-t border-gray-100 px-6 py-10 sm:px-12">
+					<div class="text-center">
+						<p class="font-inter text-base text-gray-700 sm:text-lg mb-4">
+							<?php esc_html_e('You can log in using the email address you used during purchase:', 'walla'); ?>
+						</p>
+						<p class="font-sora text-lg font-semibold text-gray-900 mb-8">
+							<?php echo esc_html($order->get_billing_email()); ?>
+						</p>
+						
+						<p class="font-inter text-sm text-gray-600 mb-8">
+							<?php esc_html_e('If you encounter any issues, you can contact support.', 'walla'); ?>
+						</p>
+
+						<div class="mt-10 flex flex-wrap gap-3 justify-center">
+							<a
+								class="inline-flex items-center justify-center rounded-full bg-gray-900 px-6 py-3 font-sora text-sm font-semibold text-white hover:bg-gray-800"
+								href="#"
+							>
+								<?php esc_html_e('Contact Support', 'walla'); ?>
+							</a>
+							<a
+								class="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-6 py-3 font-sora text-sm font-semibold text-gray-700 hover:border-gray-300 hover:text-gray-900"
+								href="<?php echo esc_url(home_url('/dashboard')); ?>"
+							>
+								<?php esc_html_e('Go To Login', 'walla'); ?>
+							</a>
+						</div>
+					</div>
+				</div>
+			</section>
+		<?php elseif ($can_display && $order) : ?>
 			<section class="rounded-3xl bg-white shadow-xl">
 				<div class="rounded-t-3xl bg-white px-8 py-12 text-center sm:px-16">
 					<h1 class="font-sora text-4xl font-semibold text-gray-900 sm:text-5xl">
