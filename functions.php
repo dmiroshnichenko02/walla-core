@@ -487,3 +487,28 @@ add_action('template_redirect', function() {
         exit;
     }
 });
+
+// Redirect WooCommerce lost password to Tutor retrieve password page
+add_action('template_redirect', function() {
+    if ( is_admin() || ( function_exists('wp_doing_ajax') && wp_doing_ajax() ) ) {
+        return;
+    }
+    
+    // Check if we're on WooCommerce lost password page (but not for newaccount action)
+    if ( function_exists('is_account_page') && is_account_page() ) {
+        global $wp;
+        
+        // Check if it's lost-password endpoint
+        if ( isset( $wp->query_vars['lost-password'] ) ) {
+            // Don't redirect if it's newaccount action (password set for new account)
+            if ( ! isset( $_GET['action'] ) || $_GET['action'] !== 'newaccount' ) {
+                // Also don't redirect if show-reset-form is set (password reset form)
+                if ( ! isset( $_GET['show-reset-form'] ) ) {
+                    // Redirect to Tutor retrieve password page
+                    wp_safe_redirect( home_url( '/dashboard/retrieve-password/' ) );
+                    exit;
+                }
+            }
+        }
+    }
+}, 5 );
