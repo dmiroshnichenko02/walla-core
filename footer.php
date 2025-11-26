@@ -126,6 +126,10 @@
 		.site-footer .wpcf7 .wpcf7-spinner {position: absolute;right: 15px;}
 		.site-footer .pay-logos-row {flex-wrap:wrap;}
 	}
+
+	footer .intl-tel-input .country-list, footer .intl-tel-input .selected-flag .iti-arrow {
+		display: none !important;
+	}
 </style>
 
 <footer id="colophon" class="site-footer bg-[#030616] pt-5 md:pt-17.5 px-4">
