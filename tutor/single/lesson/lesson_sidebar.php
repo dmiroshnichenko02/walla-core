@@ -56,7 +56,6 @@ $is_public_course             = \TUTOR\Course_List::is_public( $course_id );
 		border-color: #FF00A3 !important;
     	background-color: #FF00A3 !important;
 	}
-	/* Green highlighting for completed lessons */
 	.tutor-course-topic-item-title.text-green-500 {
 		color: #22c55e !important;
 	}
@@ -135,12 +134,28 @@ if ( $topics->have_posts() ) {
 
 					if ( 'tutor_quiz' === $post->post_type ) {
 						$quiz = $post;
+						
+						$current_quiz_id = get_the_ID();
+						$is_user_logged_in = is_user_logged_in();
+						$is_quiz_passed = false;
+						
+						if ( $is_user_logged_in && class_exists( 'Tutor\Models\QuizModel' ) ) {
+							$is_quiz_passed = QuizModel::is_quiz_passed( $current_quiz_id, get_current_user_id() );
+						}
+						
+						$quiz_title_class = 'tutor-course-topic-item-title tutor-fs-7 tutor-fw-medium';
+						$quiz_icon_class = 'tutor-course-topic-item-icon tutor-icon-quiz-o tutor-mr-8 tutor-mt-2';
+						
+						if ( $is_quiz_passed && $is_user_logged_in ) {
+							$quiz_title_class .= ' text-green-500';
+							$quiz_icon_class .= ' text-green-500';
+						}
 						?>
 						<div class="tutor-course-topic-item tutor-course-topic-item-quiz<?php echo ( get_the_ID() == $current_post->ID ) ? ' is-active' : ''; ?>" data-quiz-id="<?php echo esc_attr( $quiz->ID ); ?>">
 							<a href="<?php echo $show_permalink ? esc_url( get_permalink( $quiz->ID ) ) : '#'; ?>" data-quiz-id="<?php echo esc_attr( $quiz->ID ); ?>">
 								<div class="tutor-d-flex tutor-mr-32">
-									<span class="tutor-course-topic-item-icon tutor-icon-quiz-o tutor-mr-8 tutor-mt-2" area-hidden="true"></span>
-									<span class="tutor-course-topic-item-title tutor-fs-7 tutor-fw-medium">
+									<span class="<?php echo esc_attr( $quiz_icon_class ); ?>" area-hidden="true"></span>
+									<span class="<?php echo esc_attr( $quiz_title_class ); ?>">
 										<?php echo esc_html( $quiz->post_title ); ?>
 									</span>
 								</div>
@@ -266,7 +281,6 @@ if ( $topics->have_posts() ) {
 						}
 						$is_completed_lesson = tutor_utils()->is_completed_lesson();
 						
-						// Check if lesson is completed for green highlighting
 						$current_lesson_id = get_the_ID();
 						$is_user_logged_in = is_user_logged_in();
 						$is_completed = false;
@@ -275,7 +289,6 @@ if ( $topics->have_posts() ) {
 							$is_completed = tutor_utils()->is_completed_lesson( $current_lesson_id );
 						}
 						
-						// Add green class if completed
 						$lesson_title_class = 'tutor-course-topic-item-title tutor-fs-7 tutor-fw-medium';
 						$icon_class = 'tutor-course-topic-item-icon tutor-mr-8 tutor-mt-2';
 						

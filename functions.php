@@ -512,3 +512,75 @@ add_action('template_redirect', function() {
         }
     }
 }, 5 );
+
+
+add_filter('post_link', function($permalink, $post, $leavename) {
+    if ( ! function_exists('tutor_utils') ) {
+        return $permalink;
+    }
+    
+    $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+    if ( strpos( $request_uri, '/dashboard' ) === false ) {
+        return $permalink;
+    }
+    
+    if ( ! isset( $post->post_type ) || $post->post_type !== 'courses' ) {
+        return $permalink;
+    }
+    
+    $user_id = get_current_user_id();
+    if ( ! $user_id ) {
+        return $permalink;
+    }
+    
+    if ( ! tutor_utils()->is_enrolled( $post->ID, $user_id ) ) {
+        return $permalink;
+    }
+    
+    $first_lesson_url = tutor_utils()->get_course_first_lesson( $post->ID, tutor()->lesson_post_type );
+    if ( ! $first_lesson_url ) {
+        $first_lesson_url = tutor_utils()->get_course_first_lesson( $post->ID );
+    }
+    
+    if ( $first_lesson_url ) {
+        return $first_lesson_url;
+    }
+    
+    return $permalink;
+}, 10, 3);
+
+add_filter('the_permalink', function($permalink) {
+    if ( ! function_exists('tutor_utils') ) {
+        return $permalink;
+    }
+    
+    $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+    if ( strpos( $request_uri, '/dashboard' ) === false ) {
+        return $permalink;
+    }
+
+    global $post;
+    if ( ! $post || ! isset( $post->post_type ) || $post->post_type !== 'courses' ) {
+        return $permalink;
+    }
+    
+    $user_id = get_current_user_id();
+    if ( ! $user_id ) {
+        return $permalink;
+    }
+    
+    if ( ! tutor_utils()->is_enrolled( $post->ID, $user_id ) ) {
+        return $permalink;
+    }
+
+    $first_lesson_url = tutor_utils()->get_course_first_lesson( $post->ID, tutor()->lesson_post_type );
+    if ( ! $first_lesson_url ) {
+        $first_lesson_url = tutor_utils()->get_course_first_lesson( $post->ID );
+    }
+    
+    if ( $first_lesson_url ) {
+        return $first_lesson_url;
+    }
+    
+    return $permalink;
+}, 10, 1);
