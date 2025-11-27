@@ -205,7 +205,16 @@
 
 .tutor-course-single-content-wrapper .tutor-accordion-item-header {
   padding: 14px 34px;
-  padding-left: 74px;
+  padding-left: 40px;
+}
+
+.tutor-course-single-content-wrapper .tutor-accordion-item-header i {
+  display: none !important;
+}
+
+
+.tutor-course-single-content-wrapper .tutor-accordion-item-header::after {
+  left: 20px !important;
 }
 
 .tutor-course-single-sidebar-wrapper .tutor-course-topic:first-child .tutor-accordion-item-header:first-child {
@@ -224,6 +233,33 @@
 
 .tutor-course-single-content-wrapper .tutor-course-single-sidebar-title {
   display: none !important;
+}
+
+.tutor-course-single-content-wrapper .tutor-accordion-item-header.is-active .tutor-course-topic-title {
+  font-family: "Inter";
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: #000 !important;
+}
+
+.tutor-course-single-content-wrapper .tutor-accordion-item-header .tutor-course-topic-title {
+  color: #000 !important;
+}
+.tutor-course-single-content-wrapper .tutor-accordion-item-header:hover .tutor-course-topic-title {
+  color: #000 !important;
+}
+
+.tutor-course-single-content-wrapper .tutor-accordion-item-header.is-active::after, .tutor-course-single-sidebar-wrapper .tutor-course-topic-item-lesson.is-active span{
+  color: #000 !important;
+}
+
+.tutor-course-single-sidebar-wrapper .tutor-course-topic-item-lesson.is-active a{
+  background: none !important;
+}
+
+.tutor-course-single-sidebar-wrapper .tutor-course-topic-item-lesson:hover span, .tutor-course-single-sidebar-wrapper .tutor-course-topic-item-quiz:hover span{
+  color: #000 !important;
 }
 
 .tutor-course-single-content-wrapper .tutor-course-single-sidebar-wrapper .tutor-accordion-item-body {

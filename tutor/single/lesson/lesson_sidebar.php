@@ -50,11 +50,24 @@ $is_public_course             = \TUTOR\Course_List::is_public( $course_id );
 <style>
 	.tutor-lesson-toggle {
 		background-color: none !important;
+		display: none !important; /* -- disable checkbox for lesson -- */
 	}
 	.tutor-lesson-toggle:checked, .tutor-quiz-toggle:checked {
 		border-color: #FF00A3 !important;
     	background-color: #FF00A3 !important;
-		}
+	}
+	/* Green highlighting for completed lessons */
+	.tutor-course-topic-item-title.text-green-500 {
+		color: #22c55e !important;
+	}
+	.tutor-course-topic-item-icon.text-green-500 {
+		color: #22c55e !important;
+	}
+	.tutor-course-topic-item-icon.text-green-500 svg,
+	.tutor-course-topic-item-icon.text-green-500::before {
+		color: #22c55e !important;
+		fill: #22c55e !important;
+	}
 </style>
 
 <?php
@@ -252,13 +265,31 @@ if ( $topics->have_posts() ) {
 							$play_time = $video->playtime;
 						}
 						$is_completed_lesson = tutor_utils()->is_completed_lesson();
+						
+						// Check if lesson is completed for green highlighting
+						$current_lesson_id = get_the_ID();
+						$is_user_logged_in = is_user_logged_in();
+						$is_completed = false;
+						
+						if ( $is_user_logged_in && function_exists( 'tutor_utils' ) ) {
+							$is_completed = tutor_utils()->is_completed_lesson( $current_lesson_id );
+						}
+						
+						// Add green class if completed
+						$lesson_title_class = 'tutor-course-topic-item-title tutor-fs-7 tutor-fw-medium';
+						$icon_class = 'tutor-course-topic-item-icon tutor-mr-8 tutor-mt-2';
+						
+						if ( $is_completed && $is_user_logged_in ) {
+							$lesson_title_class .= ' text-green-500';
+							$icon_class .= ' text-green-500';
+						}
 						?>
 						<div class="tutor-course-topic-item tutor-course-topic-item-lesson<?php echo esc_attr( get_the_ID() == $current_post->ID ? ' is-active' : '' ); ?>">
 							<a href="<?php echo $show_permalink ? esc_url( get_the_permalink() ) : '#'; ?>" data-lesson-id="<?php the_ID(); ?>">
 								<div class="tutor-d-flex tutor-mr-32">
 									<?php
 									$tutor_lesson_type_icon = $play_time ? 'brand-youtube-bold' : 'document-text';
-									$markup                 = '<span class="tutor-course-topic-item-icon tutor-icon-' . $tutor_lesson_type_icon . ' tutor-mr-8 tutor-mt-2" area-hidden="true"></span>';
+									$markup                 = '<span class="' . esc_attr( $icon_class ) . ' tutor-icon-' . $tutor_lesson_type_icon . '" area-hidden="true"></span>';
 									echo wp_kses(
 										$markup,
 										array(
@@ -269,7 +300,7 @@ if ( $topics->have_posts() ) {
 										)
 									);
 									?>
-									<span class="tutor-course-topic-item-title tutor-fs-7 tutor-fw-medium">
+									<span class="<?php echo esc_attr( $lesson_title_class ); ?>">
 										<?php the_title(); ?>
 									</span>
 								</div>
