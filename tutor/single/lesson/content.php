@@ -397,319 +397,255 @@ if ( $can_review && ! $has_my_review ) {
 <?php endif; ?> -->
 
 <!-- Bot -->
- <?php
-
+<?php
 	$bot_logotype = get_field('bot_logotype', 'option');
-	$send_message_icon = get_field('send_message_icon', 'option');
-	$bot_collapse_timer_message = get_field('bot_collapse_timer_message', 'option');
-	$bot_collapse_message_timer = get_field('bot_collapse_message_timer', 'option');
-	$bot_title = get_field('bot_title', 'option');
-	$input_placeholder = get_field('input_placeholder', 'option');
+	$bot_name = get_field('bot_name', 'option');
+	$bot_subtitle = get_field('bot_subtitle', 'option');
 	$welcome_message = get_field('welcome_message', 'option');
 	$welcome_message_label = get_field('welcome_message_label', 'option');
+	$input_placeholder = get_field('input_placeholder', 'option');
+	$send_message_icon = get_field('send_message_icon', 'option');
 	$color_palette = get_field('color_palette', 'option');
-	// Palette Items:
-	$collapse_icon_background = $color_palette['collapse_icon_background'];
-	$chat_background = $color_palette['chat_background'];
-	$chat_bot_icon_background = $color_palette['chat_bot_icon_background'];
-	$message_background = $color_palette['message_background'];
-	$message_text_color = $color_palette['message_text_color'];
-	$label_color = $color_palette['label_color'];
-	$chat_message_block_background = $color_palette['chat_message_block_background'];
-	$input_background = $color_palette['input_background'];
-	$send_button_background = $color_palette['send_button_background'];
-	$input_placeholder_color = $color_palette['input_placeholder_color'];
-	$input_text_color = $color_palette['input_text_color'];
+	
+	// Color Palette Items:
+	$collapse_icon_background = $color_palette['collapse_icon_background'] ?? '#1F2937';
+	$chat_background = $color_palette['chat_background'] ?? '#1F2937';
+	$header_background = $color_palette['header_background'] ?? '#111827';
+	$header_text_color = $color_palette['header_text_color'] ?? '#FFFFFF';
+	$header_subtitle_color = $color_palette['header_subtitle_color'] ?? '#9CA3AF';
+	$message_background = $color_palette['message_background'] ?? '#374151';
+	$user_message_background = $color_palette['user_message_background'] ?? '#4F46E5';
+	$message_text_color = $color_palette['message_text_color'] ?? '#FFFFFF';
+	$label_color = $color_palette['label_color'] ?? '#9CA3AF';
+	$input_background = $color_palette['input_background'] ?? '#374151';
+	$input_text_color = $color_palette['input_text_color'] ?? '#FFFFFF';
+	$input_placeholder_color = $color_palette['input_placeholder_color'] ?? '#9CA3AF';
+	$send_button_background = $color_palette['send_button_background'] ?? '#4F46E5';
+	$close_button_color = $color_palette['close_button_color'] ?? '#9CA3AF';
+	$back_button_color = $color_palette['back_button_color'] ?? '#9CA3AF';
+?>
 
- ?>
-
- <div class="bot relative z-9999">
-	<div class="chat-overlay" style="display: none;"></div>
-	<div class="collapse-icon w-[84px] h-[84px] bg-[<?php echo $collapse_icon_background ?>] rounded-full fixed bottom-[100px] right-[50px] flex items-center justify-center cursor-pointer">
-		<img class="max-w-[50px] max-h-[50px]" src="<?php echo $bot_logotype; ?>" alt="logotype ai">
-	</div>
-	<div  class="collapse-message fixed bottom-[185px] right-[135px] " style="display: none; opacity: 0;">
-		<div class="relative">
-			<div style="box-shadow: 0px 4px 44px 0px rgba(0,0,0,0.14);" class="w-full h-full z-20 bg-white p-5 rounded-[10px] rounded-br-[0px]">
-				<h6 class="font-inter text-black text-[18px] leading-[18px] font-normal"><?php echo $bot_collapse_timer_message; ?></h6>
-			</div>
-			<div class="absolute -right-[10px] w-[34px] h-[54px] -bottom-[30px] block" aria-hidden="true">
-				<svg width="37" height="36" viewBox="0 0 37 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 4px 44px rgba(0,0,0,0.14));">
-					<path d="M36.0309 32.1077C36.8889 33.7654 35.2095 35.5908 33.4862 34.8735L1.23192 21.448C-0.0499006 20.9144 -0.411414 19.2691 0.528674 18.2474L16.7231 0.646046C17.6632 -0.375708 19.3329 -0.152192 19.9711 1.08085L36.0309 32.1077Z" fill="white"/>
-				</svg>
-			</div>
-		</div>
+<div class="walla-bot-wrapper relative z-[99999]">
+	<div class="walla-collapse-icon fixed bottom-[20px] right-[20px] w-[60px] h-[60px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110" style="background-color: <?php echo esc_attr($collapse_icon_background); ?>; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+		<img class="walla-collapse-icon-img max-w-[32px] max-h-[32px]" src="<?php echo esc_url($bot_logotype); ?>" alt="Bot">
+		<svg class="walla-collapse-icon-arrow hidden max-w-[32px] max-h-[32px]" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: black;">
+			<path d="M8 12L16 20L24 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+		</svg>
 	</div>
 
-	<div class="chat p-5 bg-[<?php echo $chat_background ?>] w-full md:w-[502px] min-h-[70vh] md:min-h-[614px] rounded-[32px] flex flex-col fixed bottom-[20px] right-[40px]" style="display: none; opacity: 0;">
-		<div class="collapsed block mx-auto bg-white h-[4px] w-[64px] min-h-[4px] min-w-[64px] cursor-pointer mb-5"></div>
-		<div class="head-bot flex gap-5 mb-8 items-center">
-			<div class="w-[54px] h-[54px] flex justify-center items-center rounded-full bg-[<?php echo $chat_bot_icon_background ?>]">
-				<img class="max-w-[24px] max-h-[24px]" src="<?php echo $bot_logotype; ?>" alt="logotype ai">
+	<div class="walla-chat fixed bottom-[130px] right-[20px] w-full max-w-[420px] rounded-[20px] overflow-hidden transition-all duration-300 opacity-0 translate-y-5 pointer-events-none" style="background-color: <?php echo esc_attr($chat_background); ?>; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+		<div class="walla-chat-header flex items-center justify-between px-4 py-3" style="background-color: <?php echo esc_attr($header_background); ?>;">
+			<div class="flex items-center gap-3 flex-1 min-w-0">
+				<button class="walla-back-btn flex-shrink-0 p-1 cursor-pointer transition-opacity hover:opacity-70" style="color: <?php echo esc_attr($back_button_color); ?>;">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+				<div class="flex items-center gap-2 flex-1 min-w-0">
+					<div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: <?php echo esc_attr($collapse_icon_background); ?>;">
+						<img class="max-w-[18px] max-h-[18px]" src="<?php echo esc_url($bot_logotype); ?>" alt="Bot">
+					</div>
+					<div class="flex-1 min-w-0">
+						<div class="font-semibold text-sm truncate" style="color: <?php echo esc_attr($header_text_color); ?>;"><?php echo esc_html($bot_name ?: 'Fin'); ?></div>
+						<?php if ($bot_subtitle) : ?>
+							<div class="text-xs truncate" style="color: <?php echo esc_attr($header_subtitle_color); ?>;"><?php echo esc_html($bot_subtitle); ?></div>
+						<?php endif; ?>
+					</div>
+				</div>
 			</div>
-			<h4 class="font-inter font-medium text-[28px] text-white leading-[40px]"><?php echo $bot_title; ?></h4>
+			<div class="flex items-center gap-2 flex-shrink-0">
+				<button class="walla-close-btn p-1 cursor-pointer transition-opacity hover:opacity-70" style="color: <?php echo esc_attr($close_button_color); ?>;">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+			</div>
 		</div>
-		<div class="body-ai bg-[<?php echo $chat_message_block_background ?>] h-[100%] w-full rounded-[21px] flex flex-col py-6 px-4 gap-[24px]">
-		<div class="messages h-[40vh] md:h-[347px] w-full overflow-y-auto flex flex-col gap-4"></div>
-		<div class="ai-typing-indicator pl-4 text-[<?php echo $label_color; ?>] text-[12px] leading-[28px] font-inter font-medium" style="display: none;">
-			AI typing
-			<span class="typing-dots">
-				<span class="dot dot-1">.</span>
-				<span class="dot dot-2">.</span>
-				<span class="dot dot-3">.</span>
-			</span>
-		</div>
-		<form class="send-message-ai flex items-center gap-[10px]">
-			<input  class="w-full py-6 px-5 rounded-[48px] font-inter text-[14px] leading-[21px] bg-[<?php echo $input_background; ?>] text-[<?php echo $input_text_color ?>]" type="text" placeholder="<?php echo $input_placeholder ?>">
-			<button class="bg-[<?php echo $send_button_background ?>] rounded-full flex justify-center items-center w-[68px] h-[68px] min-w-[68px] min-h-[68px]">
-				<img src="<?php echo $send_message_icon ?>" alt="send">
-			</button>
-		</form>
+
+		<div class="walla-chat-body-wrapper flex flex-col" style="max-height: 500px;">
+			<div class="walla-chat-body p-4 flex-1 overflow-y-auto">
+				<div class="walla-messages">
+					<div class="walla-message walla-bot-message mb-4">
+						<div class="inline-block px-4 py-3 rounded-[18px] rounded-tl-none max-w-[85%]" style="background-color: <?php echo esc_attr($message_background); ?>;">
+							<div class="walla-welcome-message-text text-sm leading-relaxed" style="color: <?php echo esc_attr($message_text_color); ?>;" data-full-text="<?php echo esc_attr(wp_strip_all_tags($welcome_message)); ?>"></div>
+						</div>
+						<div class="mt-1 text-xs px-1" style="color: <?php echo esc_attr($label_color); ?>;">
+							<?php echo esc_html($welcome_message_label ?: 'AI Agent'); ?> • <span class="walla-time">Just now</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="walla-chat-input-wrapper px-4 pb-4 pt-2 border-t" style="border-color: rgba(255, 255, 255, 0.1);">
+				<form class="walla-send-form flex items-center gap-2">
+					<input 
+						type="text" 
+						class="walla-input flex-1 px-4 py-3 rounded-full text-sm outline-none border-none" 
+						placeholder="<?php echo esc_attr($input_placeholder ?: 'Type a message...'); ?>"
+						style="background-color: <?php echo esc_attr($input_background); ?>; color: <?php echo esc_attr($input_text_color); ?>;"
+					>
+					<button 
+						type="submit" 
+						class="walla-send-btn flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80"
+						style="background-color: <?php echo esc_attr($send_button_background); ?>;"
+					>
+						<?php if ($send_message_icon) : ?>
+							<img src="<?php echo esc_url($send_message_icon); ?>" alt="Send" class="max-w-[20px] max-h-[20px]">
+						<?php else : ?>
+							<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						<?php endif; ?>
+					</button>
+				</form>
+			</div>
 		</div>
 	</div>
- </div>
+</div>
 
- <style>
-	.send-message-ai input:placeholder {
-		color: <?php echo $input_placeholder_color ?>;
+<style>
+	.walla-bot-wrapper {
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	}
-	.send-message-ai input {
-		outline: none;
-		border: none;
+
+	.walla-collapse-icon {
+		z-index: 99999;
 	}
-	.collapse-message {
-		transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-		transform: translateY(10px);
+
+	.walla-chat {
+		z-index: 99998;
+		max-height: 600px;
 	}
-	.collapse-message.show {
+
+	.walla-chat.show {
 		opacity: 1 !important;
-		transform: translateY(0);
+		transform: translateY(0) !important;
+		pointer-events: auto !important;
 	}
-	.collapse-message.hide {
-		opacity: 0 !important;
-		transform: translateY(10px);
+
+	.walla-chat-header {
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
-	.chat {
-		transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-		transform: translateY(20px);
+
+	.walla-chat-body {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 	}
-	.chat.show {
-		opacity: 1 !important;
-		transform: translateY(0);
+
+	.walla-chat-body::-webkit-scrollbar {
+		width: 6px;
 	}
-	.chat.hide {
-		opacity: 0 !important;
-		transform: translateY(20px);
+
+	.walla-chat-body::-webkit-scrollbar-track {
+		background: transparent;
 	}
-	.collapse-icon {
-		transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+
+	.walla-chat-body::-webkit-scrollbar-thumb {
+		background-color: rgba(255, 255, 255, 0.2);
+		border-radius: 3px;
 	}
-	.collapse-icon.hide {
-		opacity: 0 !important;
-		transform: scale(0.8);
-		pointer-events: none;
+
+	.walla-chat-body::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(255, 255, 255, 0.3);
 	}
-	.collapse-icon.show {
-		opacity: 1 !important;
-		transform: scale(1);
-		pointer-events: auto;
+
+	.walla-chat-body-wrapper {
+		display: flex;
+		flex-direction: column;
 	}
-	.typing-dots {
+
+	.walla-messages {
+		min-height: 100%;
+	}
+
+	.walla-user-message {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		justify-content: flex-end;
+		margin-bottom: 1rem;
+	}
+
+	.walla-user-message .walla-message-content {
 		display: inline-block;
-		margin-left: 4px;
-		position: relative;
-		height: 18px;
-		vertical-align: middle;
+		padding: 12px 16px;
+		border-radius: 18px;
+		border-top-right-radius: 0;
+		max-width: 85%;
+		text-align: right;
 	}
-	.typing-dots .dot {
-		display: inline-block;
-		position: relative;
-		animation: typing-dot-jump 1.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+
+	.walla-user-message .walla-message-label {
+		text-align: right;
 	}
-	.typing-dots .dot-1 {
-		animation-delay: 0s;
+
+	.walla-chat-input-wrapper input::placeholder {
+		color: <?php echo esc_attr($input_placeholder_color); ?>;
 	}
-	.typing-dots .dot-2 {
-		animation-delay: 0.4s;
+
+	.walla-chat-input-wrapper input {
+		caret-color: <?php echo esc_attr($input_text_color); ?>;
+		caret-shape: block;
 	}
-	.typing-dots .dot-3 {
-		animation-delay: 0.8s;
+
+	.walla-send-btn {
+		color: white;
 	}
-	@keyframes typing-dot-jump {
-		0%, 80%, 100% {
-			transform: translateY(0);
-		}
-		40% {
-			transform: translateY(-14px);
-		}
+
+	.walla-send-btn svg {
+		color: white;
 	}
-	.message-text {
-		white-space: pre-wrap;
-		word-wrap: break-word;
+
+	.walla-collapse-icon-arrow {
+		display: none;
 	}
-	.body-ai {
-		position: relative;
+
+	.walla-collapse-icon.chat-open .walla-collapse-icon-img {
+		display: none;
 	}
-	.ai-typing-indicator {
-		position: absolute;
-		bottom: 90px;
-		left: 16px;
-		right: 16px;
-		margin-bottom: 0;
+
+	.walla-collapse-icon.chat-open .walla-collapse-icon-arrow {
+		display: block;
 	}
-	.chat-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.5);
-		z-index: 9998;
-		opacity: 0;
-		transition: opacity 0.5s ease-in-out;
-		pointer-events: none;
-	}
-	.chat-overlay.show {
-		opacity: 1;
-		pointer-events: auto;
-	}
+
 	@media (max-width: 767px) {
-		.chat {
-			width: 100% !important;
-			max-width: 100% !important;
-			height: 70vh !important;
-			min-height: 70vh !important;
-			max-height: 70vh !important;
+		.walla-chat {
 			bottom: 0 !important;
-			left: 0 !important;
 			right: 0 !important;
-			border-radius: 32px 32px 0 0 !important;
-			z-index: 9999 !important;
-			transform: translateZ(0);
-			-webkit-transform: translateZ(0);
-			will-change: transform;
+			left: 0 !important;
+			max-width: 100% !important;
+			border-radius: 20px 20px 0 0 !important;
+			max-height: 85vh !important;
 		}
-		.chat-overlay {
-			display: block !important;
-		}
-		.tutor-nav.tutor-course-spotlight-nav.tutor-justify-center {
-			flex-wrap: nowrap !important;
-			overflow-x: auto !important;
-			overflow-y: hidden !important;
-		}
-	}
- </style>
 
- <script>
- document.addEventListener("DOMContentLoaded", e => {
-	const collapseIcon = document.querySelector('.collapse-icon');
-	const collapseMessage = document.querySelector('.collapse-message');
-	const chat = document.querySelector('.chat');
-	const chatOverlay = document.querySelector('.chat-overlay');
-	const collapsed = document.querySelector('.collapsed');
-	const messagesContainer = document.querySelector('.messages');
-	const typingIndicator = document.querySelector('.ai-typing-indicator');
-	const form = document.querySelector('.send-message-ai');
-	const input = form ? form.querySelector('input') : null;
-	
-	function isMobile() {
-		return window.innerWidth < 768;
+		.walla-collapse-icon {
+			bottom: 20px !important;
+			right: 20px !important;
+		}
 	}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+	const collapseIcon = document.querySelector('.walla-collapse-icon');
+	const chat = document.querySelector('.walla-chat');
+	const backBtn = document.querySelector('.walla-back-btn');
+	const closeBtn = document.querySelector('.walla-close-btn');
+	const timeElement = document.querySelector('.walla-time');
+	const messagesContainer = document.querySelector('.walla-messages');
+	const sendForm = document.querySelector('.walla-send-form');
+	const input = sendForm ? sendForm.querySelector('.walla-input') : null;
 	
-	let messageTimer = null;
-	let hideTimer = null;
 	let isChatOpen = false;
-	let isTimerActive = false;
 	let dateUpdateInterval = null;
-	let chatOpenedTime = null;
-	let chatHistory = [];
-	let lastRenderedIndex = -1;
-	
-	const hasTimer = <?php echo $bot_collapse_message_timer ? 'true' : 'false'; ?>;
-	let intervalMs = 0;
-	const hideDelayMs = 10000;
-	
-	<?php if ( $bot_collapse_message_timer ) : ?>
-	const timerValue = '<?php echo esc_js( $bot_collapse_message_timer ); ?>';
-	
-	if (timerValue && timerValue.trim()) {
-		const parts = timerValue.trim().split(':');
-		if (parts.length === 2) {
-			const minutes = parseInt(parts[0].trim(), 10) || 0;
-			const seconds = parseInt(parts[1].trim(), 10) || 0;
-			intervalMs = (minutes * 60 + seconds) * 1000;
-		} else if (parts.length === 1) {
-			intervalMs = parseInt(parts[0].trim(), 10) * 1000 || 0;
-		}
-	}
-	
-	if (intervalMs < 10000) {
-		intervalMs = 10000;
-	}
-	<?php endif; ?>
-	
-	function stopMessageTimer() {
-		if (messageTimer) {
-			clearTimeout(messageTimer);
-			messageTimer = null;
-		}
-		if (hideTimer) {
-			clearTimeout(hideTimer);
-			hideTimer = null;
-		}
-		isTimerActive = false;
-	}
-	
-	function hideCollapseMessage() {
-		if (!collapseMessage) return;
-		
-		collapseMessage.classList.remove('show');
-		collapseMessage.classList.add('hide');
-		
-		setTimeout(function() {
-			if (collapseMessage.classList.contains('hide')) {
-				collapseMessage.style.display = 'none';
-			}
-		}, 500);
-	}
-	
-	function showCollapseMessage() {
-		if (!collapseMessage || isChatOpen) return;
-		
-		collapseMessage.style.display = 'block';
-		requestAnimationFrame(function() {
-			setTimeout(function() {
-				collapseMessage.classList.remove('hide');
-				collapseMessage.classList.add('show');
-			}, 10);
-		});
-		
-		hideTimer = setTimeout(function() {
-			hideCollapseMessage();
-			
-			if (isTimerActive && !isChatOpen) {
-				messageTimer = setTimeout(showCollapseMessage, intervalMs - hideDelayMs);
-			}
-		}, hideDelayMs);
-	}
-	
-	function startMessageTimer() {
-		if (!hasTimer || isChatOpen || isTimerActive) return;
-		
-		isTimerActive = true;
-		messageTimer = setTimeout(showCollapseMessage, intervalMs);
-	}
-	
-	if (hasTimer) {
-		startMessageTimer();
-	}
+	const chatOpenedTime = new Date();
 	
 	function formatTime(date) {
 		const now = new Date();
 		const diff = Math.floor((now - date) / 1000);
 		
 		if (diff < 60) {
-			return 'Just Now';
+			return 'Just now';
 		}
 		
 		const minutes = Math.floor(diff / 60);
@@ -731,43 +667,21 @@ if ( $can_review && ! $has_my_review ) {
 		return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 	}
 	
-	function updateDate() {
-		if (!messagesContainer) return;
-		
-		const allMessages = messagesContainer.querySelectorAll('.one-message');
-		
-		allMessages.forEach(function(msgEl) {
-			const dateAttr = msgEl.getAttribute('data-time');
-			if (!dateAttr) return;
-			
-			const msgDate = new Date(dateAttr);
-			if (isNaN(msgDate.getTime())) return;
-			
-			const dateEl = msgEl.querySelector('.date-m');
-			if (dateEl) {
-				const isBotMessage = msgEl.classList.contains('ai-m');
-				if (isBotMessage && chatHistory.length > 0 && chatHistory[0].role === 'bot' && chatHistory[0].date && chatHistory[0].date.getTime() === msgDate.getTime()) {
-					if (chatOpenedTime) {
-						dateEl.textContent = ' ' + formatTime(chatOpenedTime);
-					} else {
-						dateEl.textContent = ' ' + formatTime(msgDate);
-					}
-				} else {
-					dateEl.textContent = ' ' + formatTime(msgDate);
-				}
-			}
-		});
+	function updateTime() {
+		if (timeElement) {
+			timeElement.textContent = formatTime(chatOpenedTime);
+		}
 	}
 	
-	function startDateUpdater() {
+	function startTimeUpdater() {
 		if (dateUpdateInterval) {
 			clearInterval(dateUpdateInterval);
 		}
-		updateDate();
-		dateUpdateInterval = setInterval(updateDate, 5000);
+		updateTime();
+		dateUpdateInterval = setInterval(updateTime, 60000);
 	}
 	
-	function stopDateUpdater() {
+	function stopTimeUpdater() {
 		if (dateUpdateInterval) {
 			clearInterval(dateUpdateInterval);
 			dateUpdateInterval = null;
@@ -776,83 +690,42 @@ if ( $can_review && ! $has_my_review ) {
 	
 	function scrollToBottom() {
 		if (messagesContainer) {
-			requestAnimationFrame(() => {
-				messagesContainer.scrollTop = messagesContainer.scrollHeight;
-			});
+			const chatBody = messagesContainer.closest('.walla-chat-body');
+			if (chatBody) {
+				requestAnimationFrame(() => {
+					chatBody.scrollTop = chatBody.scrollHeight;
+				});
+			}
 		}
 	}
 	
-	function renderMessages() {
-		if (!messagesContainer) return;
-		
-		for (let i = lastRenderedIndex + 1; i < chatHistory.length; i++) {
-			const msg = chatHistory[i];
-			const msgEl = document.createElement('div');
-			msgEl.className = `one-message ${msg.role === 'bot' ? 'ai-m' : 'user-m'} text-[<?php echo $message_text_color; ?>]`;
-			msgEl.setAttribute('data-time', msg.date.toISOString());
-			
-			const boxDiv = document.createElement('div');
-			boxDiv.className = `box p-5 rounded-[21px] ${msg.role === 'bot' ? 'rounded-tl-none' : 'rounded-tr-none'} bg-[<?php echo $message_background; ?>]`;
-			
-			const msgContent = document.createElement('div');
-			msgContent.className = 'message-text font-inter text-white text-[18px] leading-[28px] font-medium';
-			msgContent.innerHTML = msg.html;
-			boxDiv.appendChild(msgContent);
-			msgEl.appendChild(boxDiv);
-			
-			const labelDiv = document.createElement('div');
-			labelDiv.className = 'label-m mt-[6px] pl-4 text-[<?php echo $label_color; ?>] text-[12px] leading-[28px] font-inter font-medium';
-			if (msg.role === 'bot') {
-				labelDiv.innerHTML = `<?php echo $welcome_message_label; ?> <span class="date-m"></span>`;
-			} else {
-				labelDiv.innerHTML = 'You ~ <span class="date-m"></span>';
-			}
-			msgEl.appendChild(labelDiv);
-			
-			messagesContainer.appendChild(msgEl);
-			lastRenderedIndex = i;
-			
-			if (msg.role === 'bot' && msg.date) {
-				const dateEl = msgEl.querySelector('.date-m');
-				if (dateEl) {
-					if (i === 0 && !chatOpenedTime) {
-						dateEl.textContent = ' Just Now';
-						chatOpenedTime = msg.date;
-						startDateUpdater();
-					} else {
-						dateEl.textContent = ' ' + formatTime(msg.date);
-					}
-				}
-			} else if (msg.role === 'user' && msg.date) {
-				const dateEl = msgEl.querySelector('.date-m');
-				if (dateEl) {
-					dateEl.textContent = ' ' + formatTime(msg.date);
-				}
-			}
-		}
-		
-		scrollToBottom();
-	}
-	
-	function typeMessageHTML(html, messageIndex, callback) {
-		if (!messagesContainer || messageIndex < 0 || messageIndex >= chatHistory.length) return;
-		
-		const msgElements = messagesContainer.querySelectorAll('.one-message');
-		if (!msgElements[messageIndex]) return;
-		
-		const element = msgElements[messageIndex].querySelector('.message-text');
-		if (!element) return;
+	function typeText(element, text, speed, callback) {
+		if (!element || !text) return;
 		
 		let index = 0;
-		const typingSpeed = 30;
-		let currentHTML = '';
+		element.textContent = '';
 		
 		function type() {
-			if (index < html.length) {
-				currentHTML += html.charAt(index);
-				element.innerHTML = currentHTML;
+			if (index < text.length) {
+				const char = text.charAt(index);
+				element.textContent += char;
 				index++;
-				setTimeout(type, typingSpeed);
+				
+				let nextDelay = speed;
+				if (char === ' ' || char === '\n') {
+					nextDelay = speed * 0.3;
+				} else if (char === '.' || char === '!' || char === '?') {
+					nextDelay = speed * 3.5;
+				} else if (char === ',' || char === ';' || char === ':') {
+					nextDelay = speed * 2.5;
+				} else if (/[a-zA-Z]/.test(char)) {
+					nextDelay = speed + Math.random() * 10;
+				} else {
+					nextDelay = speed * 1.2;
+				}
+				
+				setTimeout(type, nextDelay);
+				scrollToBottom();
 			} else {
 				if (callback) callback();
 			}
@@ -861,182 +734,127 @@ if ( $can_review && ! $has_my_review ) {
 		type();
 	}
 	
-	function showWelcomeMessage() {
-		if (!typingIndicator || !messagesContainer) return;
+	function addUserMessage(text) {
+		if (!messagesContainer) return;
 		
-		const welcomeHTML = <?php echo json_encode( $welcome_message ); ?>;
-		const welcomeDate = new Date();
+		const userMessageBg = '<?php echo esc_js($user_message_background); ?>';
+		const messageTextColor = '<?php echo esc_js($message_text_color); ?>';
+		const labelColor = '<?php echo esc_js($label_color); ?>';
 		
-		typingIndicator.style.display = 'block';
+		const messageDiv = document.createElement('div');
+		messageDiv.className = 'walla-user-message';
 		
-		setTimeout(function() {
-			typingIndicator.style.display = 'none';
-			
-			chatHistory.push({
-				role: 'bot',
-				html: '',
-				date: welcomeDate
-			});
-			
-			renderMessages();
-			
-			const messageIndex = chatHistory.length - 1;
-			typeMessageHTML(welcomeHTML, messageIndex, function() {
-				chatHistory[messageIndex].html = welcomeHTML;
-			});
-		}, 1500);
+		const contentDiv = document.createElement('div');
+		contentDiv.className = 'walla-message-content';
+		contentDiv.style.cssText = 'background-color: ' + userMessageBg + '; color: ' + messageTextColor + '; padding: 12px 16px; border-radius: 18px; border-top-right-radius: 0; max-width: 85%; display: inline-block; text-align: right;';
+		
+		const labelDiv = document.createElement('div');
+		labelDiv.className = 'walla-message-label mt-1 text-xs px-1';
+		labelDiv.style.cssText = 'color: ' + labelColor + '; text-align: right;';
+		labelDiv.innerHTML = 'You • <span class="user-time">Just now</span>';
+		
+		messageDiv.appendChild(contentDiv);
+		messageDiv.appendChild(labelDiv);
+		messagesContainer.appendChild(messageDiv);
+		
+		typeText(contentDiv, text, 35, function() {
+			const userTimeEl = messageDiv.querySelector('.user-time');
+			if (userTimeEl) {
+				const msgTime = new Date();
+				userTimeEl.textContent = formatTime(msgTime);
+			}
+		});
+		
+		scrollToBottom();
 	}
 	
 	function openChat() {
-		if (isChatOpen) return;
+		if (isChatOpen || !chat) return;
 		
 		isChatOpen = true;
 		
-		if (hasTimer) {
-			stopMessageTimer();
-			hideCollapseMessage();
-		}
-		
 		if (collapseIcon) {
-			collapseIcon.classList.remove('show');
-			collapseIcon.classList.add('hide');
+			collapseIcon.classList.add('chat-open');
 		}
 		
-		if (!chat) return;
-		
-		if (isMobile() && chatOverlay) {
-			chatOverlay.style.display = 'block';
-			requestAnimationFrame(function() {
-				setTimeout(function() {
-					chatOverlay.classList.add('show');
-				}, 10);
-			});
-		}
-		
-		chat.style.display = 'flex';
+		chat.style.display = 'block';
 		requestAnimationFrame(function() {
 			setTimeout(function() {
-				chat.classList.remove('hide');
 				chat.classList.add('show');
+				startTimeUpdater();
 				
-				if (chatHistory.length === 0) {
-					setTimeout(showWelcomeMessage, 300);
-				} else {
-					if (messagesContainer) {
-						messagesContainer.innerHTML = '';
-					}
-					lastRenderedIndex = -1;
-					renderMessages();
-					if (chatOpenedTime) {
-						startDateUpdater();
+				const welcomeMessageEl = document.querySelector('.walla-welcome-message-text');
+				if (welcomeMessageEl) {
+					const fullText = welcomeMessageEl.getAttribute('data-full-text') || '';
+					if (fullText) {
+						setTimeout(function() {
+							typeText(welcomeMessageEl, fullText, 35);
+						}, 300);
 					}
 				}
+				
+				scrollToBottom();
 			}, 10);
 		});
 	}
 	
 	function closeChat() {
-		if (!isChatOpen) return;
+		if (!isChatOpen || !chat) return;
 		
 		isChatOpen = false;
+		stopTimeUpdater();
 		
-		stopDateUpdater();
-		
-		if (!chat) return;
-		
-		if (chatOverlay) {
-			chatOverlay.classList.remove('show');
-			setTimeout(function() {
-				if (!chatOverlay.classList.contains('show')) {
-					chatOverlay.style.display = 'none';
-				}
-			}, 500);
+		if (collapseIcon) {
+			collapseIcon.classList.remove('chat-open');
 		}
 		
 		chat.classList.remove('show');
-		chat.classList.add('hide');
 		
 		setTimeout(function() {
-			if (chat.classList.contains('hide')) {
+			if (!chat.classList.contains('show')) {
 				chat.style.display = 'none';
 			}
-			
-			if (collapseIcon) {
-				collapseIcon.classList.remove('hide');
-				collapseIcon.classList.add('show');
-			}
-			
-			if (typingIndicator) {
-				typingIndicator.style.display = 'none';
-			}
-			
-			if (hasTimer) {
-				startMessageTimer();
-			}
-		}, 500);
+		}, 300);
 	}
 	
 	if (collapseIcon) {
-		collapseIcon.addEventListener('click', openChat);
-	}
-	
-	if (collapseMessage) {
-		collapseMessage.addEventListener('click', openChat);
-	}
-	
-	if (collapsed) {
-		collapsed.addEventListener('click', closeChat);
-	}
-	
-	if (chatOverlay) {
-		chatOverlay.addEventListener('click', function(e) {
-			if (isMobile() && isChatOpen) {
+		collapseIcon.addEventListener('click', function() {
+			if (isChatOpen) {
 				closeChat();
+			} else {
+				openChat();
 			}
 		});
 	}
 	
-	if (form && input) {
-		form.addEventListener('submit', function(e) {
+	if (backBtn) {
+		backBtn.addEventListener('click', closeChat);
+	}
+	
+	if (closeBtn) {
+		closeBtn.addEventListener('click', closeChat);
+	}
+	
+	if (sendForm && input) {
+		sendForm.addEventListener('submit', function(e) {
 			e.preventDefault();
 			const message = input.value.trim();
 			if (!message) return;
 			
-			const userMessage = message.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-			
-			chatHistory.push({
-				role: 'user',
-				html: userMessage,
-				date: new Date()
-			});
-			
+			addUserMessage(message);
 			input.value = '';
-			renderMessages();
 		});
 		
 		input.addEventListener('keydown', function(e) {
 			if (e.key === 'Enter' && !e.shiftKey) {
 				e.preventDefault();
-				form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+				sendForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 			}
 		});
 	}
 	
-	document.addEventListener('click', function(e) {
-		if (!isChatOpen) return;
-		
-		const clickedInsideChat = chat && chat.contains(e.target);
-		const clickedOnCollapseIcon = collapseIcon && collapseIcon.contains(e.target);
-		const clickedOnCollapseMessage = collapseMessage && collapseMessage.contains(e.target);
-		const clickedOnOverlay = chatOverlay && chatOverlay.contains(e.target);
-		
-		if (isMobile() && clickedOnOverlay) {
-			return;
-		}
-		
-		if (!clickedInsideChat && !clickedOnCollapseIcon && !clickedOnCollapseMessage) {
-			closeChat();
-		}
-	});
- })
- </script>
+	if (timeElement) {
+		updateTime();
+	}
+});
+</script>
