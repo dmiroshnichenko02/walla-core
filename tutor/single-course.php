@@ -182,7 +182,7 @@ if ($timer_duration) {
 			<?php
 			$blocks_smb = get_field('blocks_smb');
 			if ($blocks_smb): ?>
-				<div class="flex -mx-[6px] gap-y-2 md:gap-y-3">
+				<div class="flex flex-wrap md:flex-nowrap -mx-[6px] gap-y-2 md:gap-y-3">
 					<?php
 					$i = 0;
 					$colors = [
@@ -460,11 +460,11 @@ if ($what_learn_smb): ?>
 
 						<div class="topic-item overflow-hidden first:rounded-tl-[24px] first:rounded-tr-[24px] last:rounded-bl-[24px] last:rounded-br-[24px]">
 							<div class="topic-header <?php echo $is_topic_active ? 'active' : ''; ?> bg-[#F4F4F4] p-4 md:py-5 md:px-[34px] cursor-pointer group">
-								<div class="flex items-center justify-between">
+								<div class="flex items-center justify-between gap-1">
 									<div class="topic-title flex items-center gap-2 md:gap-3 font-inter font-medium text-[16px] md:text-[20px]"><svg class="group-[.active]:rotate-180 transition w-[24px] md:w-[32px]" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
 											<path d="M8 12L16 20L24 12" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 										</svg><?php echo esc_html($topic_title); ?></div>
-									<div class="topic-meta font-inter font-medium">
+									<div class="topic-meta font-inter font-medium min-w-[100px]">
 										<?php echo $topic_lessons ? $topic_lessons->found_posts : 0; ?> lectures •
 										<?php
 										$topic_duration = 0;
@@ -704,7 +704,7 @@ if (expandAllBtn) {
 				</div>
 
 				<div class="relative z-20">
-					<h2 class="max-w-[200px] md:max-w-full font-manrope text-[32px] text-white leading-[40px] font-medium mb-4"><?php echo get_field('title_certificate_aib', 'option'); ?></h2>
+					<h2 class="max-w-[260px] md:max-w-full font-manrope capitalize text-[32px] text-white leading-[40px] font-medium mb-4"><?php echo get_field('title_certificate_aib', 'option'); ?></h2>
 					<div class="font-inter font-medium text-[16px] md:text-[20px] text-white/70"><?php echo get_field('description_certificate_aib', 'option'); ?></div>
 				</div>
 
@@ -1062,15 +1062,15 @@ if ($faqs): ?>
 
 	<section class="mb-5">
 		<div class="px-5">
-			<div class="flex gap-5 justify-between bg-[#F6F6F6] py-[100px] px-[91px] rounded-[36px] items-start">
-				<div class="bg-white border border-solid border-[rgba(0,0,0,0.1)] rounded-[24px] p-10 w-1/2">
-					<div class="flex justify-between gap-10">
+			<div class="flex flex-col md:flex-row gap-5 justify-between bg-[#F6F6F6] p-5 xl:py-[100px] xl:px-[91px] rounded-[36px] items-start">
+				<div class="bg-white border border-solid border-[rgba(0,0,0,0.1)] rounded-[24px] p-4 md:p-10 w-full md:w-1/2">
+					<div class="flex flex-col md:flex-row justify-between gap-5 md:gap-10">
 						<h3 class="font-roboto text-[32px] leading-[40px] font-bold text-black capitalize"><?php echo $title_left; ?></h3>
 						<div class="course-timer flex flex-col gap-[4px]">
 							<h5 class="font-inter text-[16px] leading-[20px] font-medium text-black"><?php echo $discount_text; ?></h5>
 							<div class="timer-course">
 								<?php if ($timer_duration_seconds > 0): ?>
-									<span class="timer-container flex justify-end">
+									<span class="timer-container flex md:justify-end">
 										<span id="course-timer-bottom" data-duration="<?php echo esc_attr($timer_duration_seconds); ?>" class="font-inter font-bold text-[18px] text-black"></span>
 									</span>
 								<?php endif; ?>
@@ -1140,13 +1140,13 @@ if ($faqs): ?>
 								padding-left: 20px;
 							}
 						</style>
-						<div class="text-black/60 lis mt-8">
+						<div class="text-black/60 lis mt-6 md:mt-8">
 							<?php echo $label; ?>
 					</div>
 				</div>
 
-				<div class="bg-white border border-solid border-[rgba(0,0,0,0.1)] rounded-[24px] p-10 w-1/2">
-					<h3 class="font-roboto text-[32px] leading-[40px] font-bold text-black capitalize"><?php echo $title_right; ?></h3>
+				<div class="bg-white border border-solid border-[rgba(0,0,0,0.1)] rounded-[24px] p-4 md:p-10 w-full md:w-1/2">
+					<h3 class="font-roboto text-[30px] md:text-[32px] :leading-[40px] font-bold text-black capitalize"><?php echo $title_right; ?></h3>
 					<style>
 						.form-wrap .wpcf7 input[type="text"],
 						.form-wrap .wpcf7 input[type="email"],
@@ -1265,7 +1265,7 @@ if ($faqs): ?>
 							z-index: 555;
 						}
 					</style>
-					<div class="form-wrap mt-8">
+					<div class="form-wrap mt-6 md:mt-8">
 						<?php echo do_shortcode($form_shortcode); ?>
 					</div>
 					<div class="text-black/60 font-inter text-[14px] leading-[20px] font-normal mt-3">
