@@ -1040,6 +1040,242 @@ if ($faqs): ?>
 
 		</div>
 	</section>
+
+	<?php
+	
+	$left_side = get_field('left_side', 'option');
+	$right_side = get_field('right_side', 'option');
+	
+	$title_left = $left_side['title'];
+	$discount_text = $left_side['discount_text'];
+	$header_color = $left_side['header_color'];
+	$body_discount_color = $left_side['body_discount_color'];
+	$discount_percent_color = $left_side['discount_percent_color'];
+	$header_title = $left_side['header_title'];
+	$after_price_description = $left_side['after_price_description'];
+	$label = $left_side['label'];
+
+	$title_right = $right_side['title'];
+	$form_shortcode = $right_side['form_shortcode'];
+	$form_description = $right_side['form_description'];
+	?>
+
+	<section class="mb-5">
+		<div class="px-5">
+			<div class="flex gap-5 justify-between bg-[#F6F6F6] py-[100px] px-[91px] rounded-[36px] items-start">
+				<div class="bg-white border border-solid border-[rgba(0,0,0,0.1)] rounded-[24px] p-10 w-1/2">
+					<div class="flex justify-between gap-10">
+						<h3 class="font-roboto text-[32px] leading-[40px] font-bold text-black capitalize"><?php echo $title_left; ?></h3>
+						<div class="course-timer flex flex-col gap-[4px]">
+							<h5 class="font-inter text-[16px] leading-[20px] font-medium text-black"><?php echo $discount_text; ?></h5>
+							<div class="timer-course">
+								<?php if ($timer_duration_seconds > 0): ?>
+									<span class="timer-container flex justify-end">
+										<span id="course-timer-bottom" data-duration="<?php echo esc_attr($timer_duration_seconds); ?>" class="font-inter font-bold text-[18px] text-black"></span>
+									</span>
+								<?php endif; ?>
+							</div>
+						</div>
+					</div>
+					<div class="w-full flex flex-col rounded-[12px] overflow-hidden mt-8">
+						<div class="py-[10px] bg-[<?php echo $header_color; ?>] flex justify-center items-center">
+							<h4 class="font-roboto text-[18px] leading-[26px] font-medium text-black capitalize"><?php echo $header_title; ?></h4>
+						</div>
+						<div class="p-5 pb-[47px] bg-[<?php echo $body_discount_color; ?>] flex justify-between items-start">
+							<?php
+							$course_id = get_the_ID();
+							$price_info = function_exists('tutor_utils') ? tutor_utils()->get_raw_course_price($course_id) : null;
+							$regular_price = $price_info ? (float) ($price_info->regular_price ?? 0) : 0;
+							$sale_price = $price_info ? (float) ($price_info->sale_price ?? 0) : 0;
+							$has_discount = ($regular_price > 0 && $sale_price > 0 && $sale_price < $regular_price);
+							$discount_percent = $has_discount ? round((($regular_price - $sale_price) / $regular_price) * 100) : 0;
+							
+							if (function_exists('wc_price')) {
+								$formatted_regular_price = $regular_price > 0 ? wc_price($regular_price) : '';
+								$formatted_sale_price = $sale_price > 0 ? wc_price($sale_price) : '';
+							} else {
+								$currency_symbol = function_exists('get_woocommerce_currency_symbol') ? get_woocommerce_currency_symbol() : '$';
+								$formatted_regular_price = $regular_price > 0 ? $currency_symbol . number_format($regular_price, 2) : '';
+								$formatted_sale_price = $sale_price > 0 ? $currency_symbol . number_format($sale_price, 2) : '';
+							}
+							?>
+							<div class="flex flex-col gap-1">
+								<?php if ($regular_price > 0 && $has_discount): ?>
+									<style>
+										.amt span{
+											display: inline-flex;
+											flex-direction: row-reverse;
+										}
+									</style>
+									<div class="font-inter text-[16px] leading-[20px] font-semibold text-black/70 amt">
+										<?php echo function_exists('wc_price') ? wp_kses_post($formatted_regular_price) : esc_html($formatted_regular_price); ?>
+									</div>
+								<?php elseif ($regular_price > 0 && !$has_discount && $sale_price == 0): ?>
+									<div class="font-inter text-[16px] leading-[20px] font-semibold text-black/70 amt">
+										<?php echo function_exists('wc_price') ? wp_kses_post($formatted_regular_price) : esc_html($formatted_regular_price); ?>
+									</div>
+								<?php endif; ?>
+								<?php if ($sale_price > 0): ?>
+									<div class="font-roboto text-[24px] leading-[32px] font-bold text-black amt">
+										<?php echo function_exists('wc_price') ? wp_kses_post($formatted_sale_price) : esc_html($formatted_sale_price); ?>
+									</div>
+								<?php endif; ?>
+								<div class="text-[rgba(0,0,0,0.8)] font-inter text-[12px] leading-[14px] font-normal">
+									<?php echo $after_price_description; ?>
+								</div>
+							</div>
+							<?php if ($has_discount && $discount_percent > 0): ?>
+								<div class="flex items-center">
+									<span class="font-inter text-[14px] rounded-[8px] py-[4px] px-4 leading-[21px] font-medium text-black bg-[<?php echo $discount_percent_color; ?>]">
+										-<?php echo esc_html($discount_percent); ?>%
+									</span>
+								</div>
+							<?php endif; ?>
+						</div>
+					</div>
+					
+					<style>
+							.lis ul {
+								list-style-type: disc;
+								padding-left: 20px;
+							}
+						</style>
+						<div class="text-black/60 lis mt-8">
+							<?php echo $label; ?>
+					</div>
+				</div>
+
+				<div class="bg-white border border-solid border-[rgba(0,0,0,0.1)] rounded-[24px] p-10 w-1/2">
+					<h3 class="font-roboto text-[32px] leading-[40px] font-bold text-black capitalize"><?php echo $title_right; ?></h3>
+					<style>
+						.form-wrap .wpcf7 input[type="text"],
+						.form-wrap .wpcf7 input[type="email"],
+						.form-wrap .wpcf7 input[type="tel"],
+						.form-wrap .wpcf7 input[type="password"],
+						.form-wrap .wpcf7 input[type="number"],
+						.form-wrap .wpcf7 input[type="url"],
+						.form-wrap .wpcf7 textarea,
+						.form-wrap .wpcf7 select {
+							width: 100%;
+							height: 52px;
+							border-radius: 28px;
+							background: #fff;
+							border: 1px solid #e6e7eb;
+							padding: 0 30px;
+							box-shadow: none;
+							font-size: 14px;
+							line-height: 20px;
+							color: #1D1F1E;
+							font-family: 'Roboto', sans-serif;
+							transition: all 150ms ease;
+						}
+						.form-wrap .wpcf7 input[type="text"]:focus,
+						.form-wrap .wpcf7 input[type="email"]:focus,
+						.form-wrap .wpcf7 input[type="tel"]:focus,
+						.form-wrap .wpcf7 input[type="password"]:focus,
+						.form-wrap .wpcf7 input[type="number"]:focus,
+						.form-wrap .wpcf7 input[type="url"]:focus,
+						.form-wrap .wpcf7 textarea:focus,
+						.form-wrap .wpcf7 select:focus {
+							outline: none;
+							border-color: #000;
+						}
+						.form-wrap .wpcf7 textarea {
+							height: auto;
+							min-height: 120px;
+							padding: 12px 30px;
+							border-radius: 16px;
+							resize: vertical;
+						}
+						.form-wrap .wpcf7 p {
+							position: relative;
+							margin-bottom: 24px;
+						}
+						.form-wrap .wpcf7 p:last-of-type {
+							margin-bottom: 0;
+						}
+						
+						.form-wrap .wpcf7 input::placeholder,
+						.form-wrap .wpcf7 textarea::placeholder {
+							color: #6b7280;
+							opacity: 1;
+						}
+						.form-wrap .wpcf7-submit {
+							height: 48px;
+							border-radius: 48px;
+							background: #E8F501;
+							color: #000;
+							font-size: 16px;
+							font-family: 'Roboto', sans-serif;
+							font-weight: 500;
+							border: none;
+							cursor: pointer;
+							transition: all 150ms ease;
+							margin-top: 0;
+							padding: 14px 32px;
+						}
+						.form-wrap .wpcf7-submit:hover {
+							background: #d2de09;
+							color: #000;
+						}
+						.form-wrap .wpcf7-submit:focus {
+							outline: none;
+						}
+						.form-wrap .wpcf7-response-output {
+							margin-top: 20px;
+							padding: 20px 24px;
+							border-radius: 24px;
+							font-size: 18px;
+							line-height: 28px;
+							font-family: 'Roboto', sans-serif;
+							font-weight: 400;
+						}
+						.form-wrap .wpcf7-mail-sent-ok {
+							border: 2px solid #8fae1b;
+							background: #F6F6F6;
+							color: #1D1F1E;
+						}
+						.form-wrap .wpcf7-validation-errors,
+						.form-wrap .wpcf7-mail-sent-ng {
+							border: 2px solid #b81c23;
+							background: #F6F6F6;
+							color: #1D1F1E;
+						}
+						.form-wrap .wpcf7-spinner {
+							display: none;
+						}
+						.form-wrap .wpcf7 .wpcf7-form-control-wrap {
+							display: block;
+						}
+
+						.form-wrap .label-tel {
+							position: relative;
+						}
+
+						.form-wrap .label-tel input {
+							padding-left: 60px !important;
+						}
+
+						.form-wrap .label-tel svg {
+							position: absolute;
+							content: "";
+							left: 16px;
+							top: 35%;
+							transform: translateY(-50%);
+							z-index: 555;
+						}
+					</style>
+					<div class="form-wrap mt-8">
+						<?php echo do_shortcode($form_shortcode); ?>
+					</div>
+					<div class="text-black/60 font-inter text-[14px] leading-[20px] font-normal mt-3">
+						<?php echo $form_description; ?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			const faqs = document.querySelectorAll(".faqs-one");
@@ -1071,7 +1307,7 @@ if ($faqs): ?>
 				return n < 10 ? '0' + n : n;
 			}
 			
-			var courseTimers = document.querySelectorAll('[id^="course-timer-"]');
+			var courseTimers = document.querySelectorAll('[id^="course-timer-"], #course-timer-bottom');
 			if (courseTimers.length === 0) return;
 			
 			var duration = <?php echo $timer_duration_seconds; ?>;
