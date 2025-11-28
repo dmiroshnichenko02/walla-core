@@ -335,6 +335,11 @@ add_action('after_setup_theme', function(){
     if ( file_exists( $path ) ) {
         require_once $path;
     }
+    
+    $course_callback_path = get_theme_file_path('course-api/courseUpdateCallback.php');
+    if ( file_exists( $course_callback_path ) ) {
+        require_once $course_callback_path;
+    }
 });
 
 add_filter( 'woocommerce_billing_fields', 'remove_unwanted_billing_fields' );
