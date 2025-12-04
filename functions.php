@@ -589,3 +589,262 @@ add_filter('the_permalink', function($permalink) {
     
     return $permalink;
 }, 10, 1);
+
+add_action('wp_ajax_check_quiz_entry', 'walla_check_quiz_entry');
+add_action('wp_ajax_nopriv_check_quiz_entry', 'walla_check_quiz_entry');
+
+function walla_check_quiz_entry() {
+	if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'check_quiz_entry_nonce')) {
+		wp_send_json_error(array('message' => 'Invalid nonce'));
+		return;
+	}
+
+	$form_id = isset($_POST['form_id']) ? intval($_POST['form_id']) : 0;
+	$user_email = isset($_POST['user_email']) ? sanitize_email($_POST['user_email']) : '';
+
+	if (empty($form_id) || empty($user_email)) {
+		wp_send_json_error(array('message' => 'Missing required parameters'));
+		return;
+	}
+
+	if (!class_exists('GFAPI')) {
+		wp_send_json_error(array('message' => 'Gravity Forms not available'));
+		return;
+	}
+
+	$form = GFAPI::get_form($form_id);
+	
+	if (is_wp_error($form)) {
+		wp_send_json_error(array('message' => 'Form not found', 'form_id' => $form_id));
+		return;
+	}
+
+	$entries = array();
+	
+	foreach ($form['fields'] as $field) {
+		if ($field->type === 'email') {
+			$search_criteria = array(
+				'field_filters' => array(
+					array(
+						'key' => $field->id,
+						'value' => $user_email,
+						'operator' => 'is'
+					)
+				)
+			);
+			$entries = GFAPI::get_entries($form_id, $search_criteria, array('key' => 'id', 'direction' => 'DESC'), array('offset' => 0, 'page_size' => 1));
+			if (!is_wp_error($entries) && !empty($entries)) {
+				break;
+			}
+		}
+	}
+	
+	if (empty($entries) || is_wp_error($entries)) {
+		$search_criteria = array(
+			'field_filters' => array(
+				array(
+					'value' => $user_email
+				)
+			)
+		);
+		$entries = GFAPI::get_entries($form_id, $search_criteria, array('key' => 'id', 'direction' => 'DESC'), array('offset' => 0, 'page_size' => 1));
+	}
+	
+	if ((empty($entries) || is_wp_error($entries)) && is_user_logged_in()) {
+		$current_user_id = get_current_user_id();
+		$search_criteria = array(
+			'field_filters' => array(
+				array(
+					'key' => 'created_by',
+					'value' => $current_user_id,
+					'operator' => 'is'
+				)
+			)
+		);
+		$entries = GFAPI::get_entries($form_id, $search_criteria, array('key' => 'id', 'direction' => 'DESC'), array('offset' => 0, 'page_size' => 1));
+	}
+
+	if (is_wp_error($entries)) {
+		wp_send_json_error(array('message' => 'Error searching entries', 'error' => $entries->get_error_message()));
+		return;
+	}
+
+	if (!empty($entries) && is_array($entries) && count($entries) > 0) {
+		$entry = $entries[0];
+		$entry_has_email = false;
+		
+		foreach ($entry as $key => $value) {
+			if (is_string($value) && strtolower(trim($value)) === strtolower(trim($user_email))) {
+				$entry_has_email = true;
+				break;
+			}
+		}
+		
+		if (!$entry_has_email && is_user_logged_in()) {
+			$current_user_id = get_current_user_id();
+			if (isset($entry['created_by']) && intval($entry['created_by']) === $current_user_id) {
+				$entry_has_email = true;
+			}
+		}
+		
+		if ($entry_has_email || is_user_logged_in()) {
+			wp_send_json_success(array(
+				'has_entry' => true,
+				'entry_id' => $entry['id'],
+				'debug' => array(
+					'entry_email_match' => $entry_has_email,
+					'user_logged_in' => is_user_logged_in()
+				)
+			));
+		} else {
+			wp_send_json_success(array(
+				'has_entry' => false,
+				'debug' => 'Entry found but email/user mismatch'
+			));
+		}
+	} else {
+		wp_send_json_success(array(
+			'has_entry' => false,
+			'debug' => 'No entries found'
+		));
+	}
+}
+
+add_action('wp_ajax_get_quiz_results', 'walla_get_quiz_results');
+add_action('wp_ajax_nopriv_get_quiz_results', 'walla_get_quiz_results');
+
+function walla_get_quiz_results() {
+	if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'get_quiz_results_nonce')) {
+		wp_send_json_error(array('message' => 'Invalid nonce'));
+		return;
+	}
+
+	$form_id = isset($_POST['form_id']) ? intval($_POST['form_id']) : 0;
+	$entry_id = isset($_POST['entry_id']) ? intval($_POST['entry_id']) : 0;
+
+	if (empty($form_id) || empty($entry_id)) {
+		wp_send_json_error(array('message' => 'Missing required parameters'));
+		return;
+	}
+
+	if (!class_exists('GFAPI')) {
+		wp_send_json_error(array('message' => 'Gravity Forms not available'));
+		return;
+	}
+
+	$form = GFAPI::get_form($form_id);
+	$entry = GFAPI::get_entry($entry_id);
+
+	if (is_wp_error($form)) {
+		wp_send_json_error(array('message' => 'Error loading form: ' . $form->get_error_message()));
+		return;
+	}
+
+	if (is_wp_error($entry)) {
+		wp_send_json_error(array('message' => 'Error loading entry: ' . $entry->get_error_message()));
+		return;
+	}
+
+	if (empty($form) || empty($entry)) {
+		wp_send_json_error(array('message' => 'Form or entry not found'));
+		return;
+	}
+
+	$confirmation = '<div class="gform_confirmation_wrapper"><div class="gform_confirmation_message">';
+	
+	if (class_exists('GFQuiz')) {
+		$quiz_addon = GFQuiz::get_instance();
+		if (method_exists($quiz_addon, 'get_quiz_results')) {
+			$results = $quiz_addon->get_quiz_results($form, $entry);
+			if (!empty($results) && isset($results['summary'])) {
+				$confirmation .= '<div id="gquiz_confirmation_message">';
+				$confirmation .= $results['summary'];
+				$confirmation .= '</div>';
+			}
+		}
+	}
+	
+	if (strpos($confirmation, 'gquiz_confirmation_message') === false) {
+		if (class_exists('GFFormDisplay') && method_exists('GFFormDisplay', 'update_confirmation')) {
+			$form = GFFormDisplay::update_confirmation($form, $entry);
+		}
+		
+		if (class_exists('GFFormDisplay') && method_exists('GFFormDisplay', 'get_confirmation_message')) {
+			$confirmation_type = rgar($form['confirmation'], 'type', 'message');
+			
+			if ($confirmation_type == 'message') {
+				$confirmation_msg = GFFormDisplay::get_confirmation_message($form['confirmation'], $form, $entry);
+				if (!empty($confirmation_msg)) {
+					$confirmation .= $confirmation_msg;
+				}
+			}
+		}
+	}
+	
+	if (strpos($confirmation, 'gquiz-field') === false) {
+		$confirmation .= '<h3>Your Quiz Results</h3>';
+		
+		foreach ($form['fields'] as $field) {
+			if ($field->type === 'quiz') {
+				$field_value = rgar($entry, $field->id);
+				if (!empty($field_value)) {
+					$confirmation .= '<div class="gquiz-field">';
+					$confirmation .= '<div class="gquiz-field-label">' . esc_html(GFCommon::get_label($field)) . '</div>';
+					$confirmation .= '<div class="gquiz-field-choice">' . esc_html($field_value) . '</div>';
+					$confirmation .= '</div>';
+				}
+			}
+		}
+	}
+	
+	$quiz_score = gform_get_meta($entry_id, 'gquiz_score');
+	$quiz_percent = gform_get_meta($entry_id, 'gquiz_percent');
+	$quiz_grade = gform_get_meta($entry_id, 'gquiz_grade');
+	$quiz_is_pass = gform_get_meta($entry_id, 'gquiz_is_pass');
+	
+	$max_score = false;
+	if (class_exists('GFQuiz')) {
+		$quiz_addon = GFQuiz::get_instance();
+		if (method_exists($quiz_addon, 'get_max_score')) {
+			$max_score = $quiz_addon->get_max_score($form);
+		}
+	}
+	
+	$results_html = '<div class="gquiz-results-summary" style="margin-top: 20px; padding: 20px; background: #f8f9ff; border-radius: 12px;">';
+	
+	if ($quiz_score !== false) {
+		$score_display = $max_score !== false ? $quiz_score . '/' . $max_score : $quiz_score;
+		$results_html .= '<div class="gquiz-result-item" style="margin-bottom: 12px; font-size: 18px; line-height: 24px;">';
+		$results_html .= '<strong>Total Score:</strong> ' . esc_html($score_display);
+		$results_html .= '</div>';
+	}
+	
+	if ($quiz_percent !== false) {
+		$results_html .= '<div class="gquiz-result-item" style="margin-bottom: 12px; font-size: 18px; line-height: 24px;">';
+		$results_html .= '<strong>Pass Percent:</strong> ' . esc_html($quiz_percent) . '%';
+		$results_html .= '</div>';
+	}
+	
+	if ($quiz_grade !== false && !empty($quiz_grade)) {
+		$results_html .= '<div class="gquiz-result-item" style="margin-bottom: 12px; font-size: 18px; line-height: 24px;">';
+		$results_html .= '<strong>Your Grade:</strong> ' . esc_html($quiz_grade);
+		$results_html .= '</div>';
+	}
+	
+	if ($quiz_is_pass !== false) {
+		$pass_text = ($quiz_is_pass == '1' || $quiz_is_pass === 1 || $quiz_is_pass === true) ? 'Pass' : 'Fail';
+		$results_html .= '<div class="gquiz-result-item" style="margin-bottom: 12px; font-size: 18px; line-height: 24px;">';
+		$results_html .= '<strong>Result:</strong> ' . esc_html($pass_text);
+		$results_html .= '</div>';
+	}
+	
+	$results_html .= '</div>';
+	
+	$confirmation .= $results_html;
+	
+	$confirmation .= '</div></div>';
+	
+	wp_send_json_success(array(
+		'html' => $confirmation
+	));
+}

@@ -150,6 +150,615 @@ tutor_load_template(
 		}
 	 </style>
 
+	<style>
+		.quiz-wrapper {
+			margin-top: 40px;
+			position: relative;
+		}
+
+		.quiz-wrapper .gf_progressbar_wrapper {
+			margin-bottom: 30px;
+		}
+
+		.quiz-wrapper .gf_progressbar_title {
+			margin: 0 0 10px 0;
+			font-size: 16px;
+			font-weight: 500;
+			color: #333;
+		}
+
+		.quiz-wrapper .gf_progressbar {
+			width: 100%;
+			height: 8px;
+			background-color: #e2e7ed;
+			border-radius: 4px;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.quiz-wrapper .gf_progressbar_percentage {
+			height: 100%;
+			background-color: #5C77FF;
+			border-radius: 4px;
+			transition: width 0.3s ease;
+			position: relative;
+		}
+
+		.quiz-wrapper .gf_progressbar_percentage span {
+			display: none;
+		}
+
+		.quiz-wrapper .gquiz-field {
+			margin-bottom: 30px;
+		}
+
+		.quiz-wrapper .gfield_label {
+			font-size: 20px;
+			font-weight: 600;
+			color: #000;
+			margin-bottom: 20px;
+			display: block;
+		}
+
+		.quiz-wrapper .gform_fields label {
+			max-width: 100% !important;
+			width: 100%;
+			border-radius: 24px !important;
+			border-color: rgba(0, 0, 0, 0.12);
+			border-width: 1px !important;
+		}
+
+		.quiz-wrapper .ginput_container_radio,
+		.quiz-wrapper .ginput_container_checkbox {
+			margin-top: 0;
+		}
+
+		.quiz-wrapper .gfield_radio,
+		.quiz-wrapper .gfield_checkbox {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.quiz-wrapper .gchoice {
+			margin-bottom: 12px;
+		}
+
+		.quiz-wrapper .gchoice {
+			position: relative;
+		}
+
+		.quiz-wrapper .gchoice label {
+			display: flex;
+			align-items: center;
+			padding: 16px 20px;
+			border: 2px solid #e2e7ed;
+			border-radius: 12px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			background-color: #fff;
+			font-size: 16px;
+			line-height: 24px;
+			color: #333;
+			margin: 0;
+			max-width: 100% !important;
+		}
+
+		.quiz-wrapper .gchoice label:hover {
+			border-color: #5C77FF;
+			background-color: #f8f9ff;
+		}
+
+		.quiz-wrapper .gchoice input[type="radio"],
+		.quiz-wrapper .gchoice input[type="checkbox"] {
+			margin-right: 12px;
+			width: 20px;
+			height: 20px;
+			cursor: pointer;
+			flex-shrink: 0;
+		}
+
+		.quiz-wrapper .gchoice input[type="radio"]:checked + label,
+		.quiz-wrapper .gchoice input[type="checkbox"]:checked + label {
+			border-color: #5C77FF;
+			background-color: #f0f4ff;
+		}
+
+		.quiz-wrapper .gchoice input[type="radio"]:checked ~ label,
+		.quiz-wrapper .gchoice input[type="checkbox"]:checked ~ label {
+			border-color: #5C77FF;
+			background-color: #f0f4ff;
+		}
+
+		.quiz-wrapper .gchoice:has(input[type="radio"]:checked) label,
+		.quiz-wrapper .gchoice:has(input[type="checkbox"]:checked) label {
+			border-color: #5C77FF;
+			background-color: #f0f4ff;
+		}
+
+		.quiz-wrapper .gform_page_footer {
+			display: flex;
+			justify-content: flex-end;
+			gap: 12px;
+			margin-top: 30px;
+			padding-top: 20px;
+		}
+
+		.quiz-wrapper .gform_next_button,
+		.quiz-wrapper .gform_previous_button,
+		.quiz-wrapper .gform_button {
+			display: flex !important;
+			justify-content: center !important;
+			align-items: center !important;
+			padding: 10px 24px !important;
+			font-size: 18px !important;
+			flex: 1 1 0% !important;
+			width: 100% !important;
+			max-width: 100% !important;
+			line-height: 40px !important;
+			color: #fff !important;
+			font-family: "Roboto", sans-serif !important;
+			font-weight: bold !important;
+			border-radius: 150px !important;
+			background-color: #5C77FF !important;
+			cursor: pointer !important;
+			box-sizing: border-box !important;
+		}
+
+		.quiz-wrapper .gform_next_button:hover,
+		.quiz-wrapper .gform_previous_button:hover,
+		.quiz-wrapper .gform_button:hover {
+			background-color: #4a63d9;
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(92, 119, 255, 0.3);
+		}
+
+		.quiz-wrapper .gform_previous_button {
+			background-color: #6c757d;
+		}
+
+		.quiz-wrapper .gform_previous_button:hover {
+			background-color: #5a6268;
+		}
+
+		.quiz-wrapper .gform_spinner,
+		.quiz-wrapper .gform_ajax_spinner,
+		.quiz-wrapper .gform_spinner img,
+		.quiz-wrapper .gform_ajax_spinner img,
+		.quiz-wrapper .gform_page_footer .gform_spinner,
+		.quiz-wrapper .gform_page_footer .gform_ajax_spinner,
+		.quiz-wrapper .gform_next_button + .gform_spinner,
+		.quiz-wrapper .gform_previous_button + .gform_spinner,
+		.quiz-wrapper .gform_button + .gform_spinner,
+		.quiz-wrapper .gform_next_button + .gform_ajax_spinner,
+		.quiz-wrapper .gform_previous_button + .gform_ajax_spinner,
+		.quiz-wrapper .gform_button + .gform_ajax_spinner {
+			display: none !important;
+			visibility: hidden !important;
+			opacity: 0 !important;
+			width: 0 !important;
+			height: 0 !important;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+
+		.quiz-wrapper .gform_page:not([style*="display: none"]):first-of-type .gform_previous_button,
+		.quiz-wrapper #gform_page_1 .gform_previous_button {
+			display: none !important;
+		}
+
+		.quiz-wrapper .gform_page:not([style*="display: none"]):first-of-type .gform_page_footer,
+		.quiz-wrapper #gform_page_1 .gform_page_footer {
+			justify-content: flex-end;
+		}
+
+		.quiz-wrapper .gform_wrapper {
+			background: #fff;
+			padding: 40px;
+			border-radius: 32px;
+			border: 1px solid rgba(0, 0, 0, 0.12);
+		}
+
+		.quiz-wrapper .gf_progressbar_wrapper .gf_progressbar{
+			display: none !important;
+		}
+
+		.quiz-wrapper input[type="checkbox"] {
+			position: absolute;
+			opacity: 0;
+			visibility: hidden;
+			pointer-events: none;
+			width: 0;
+			height: 0;
+			margin: 0;
+			padding: 0;
+			border: 0;
+			overflow: hidden;
+		}
+
+		.quiz-wrapper .gfield_radio input[type="radio"] {
+			position: absolute;
+			content: "";
+			left: 34px;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			border: 2px solid #5C77FF;
+			background-color: #fff;
+			transition: all 0.3s ease;
+		}
+
+		.quiz-wrapper .gfield_radio .gchoice{
+			position: relative;
+		}
+
+		.quiz-wrapper .gfield_radio label {
+			padding-left: 84px;
+			width: 100%;
+		}
+
+		.quiz-wrapper .ginput_container_select select,
+		.quiz-wrapper .gfield_select select {
+			width: 100%;
+			padding: 16px 20px;
+			border: 2px solid #e2e7ed;
+			border-radius: 12px;
+			background-color: #fff;
+			font-size: 16px;
+			line-height: 24px;
+			color: #333;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			appearance: none;
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%235C77FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+			background-repeat: no-repeat;
+			background-position: right 20px center;
+			padding-right: 50px;
+		}
+
+		.quiz-wrapper .ginput_container_select select:hover,
+		.quiz-wrapper .gfield_select select:hover {
+			border-color: #5C77FF;
+			background-color: #f8f9ff;
+		}
+
+		.quiz-wrapper .ginput_container_select select:focus,
+		.quiz-wrapper .gfield_select select:focus {
+			outline: none;
+			border-color: #5C77FF;
+			background-color: #f0f4ff;
+		}
+
+		.quiz-wrapper .ginput_container_select select:active,
+		.quiz-wrapper .gfield_select select:active {
+			border-color: #5C77FF;
+			background-color: #f0f4ff;
+		}
+
+		.quiz-wrapper .gfield_required {
+			display: none !important;
+		}
+
+		.quiz-wrapper .gfield_label {
+			color: rgba(0, 0, 0, 0.7) !important;
+			font-family: 'Inter', sans-serif !important;
+			font-size: 20px !important;
+			font-weight: 500 !important;
+			line-height: 24px !important;
+			margin-bottom: 20px !important;
+			border: none !important;
+		}
+
+		.quiz-wrapper .gform_confirmation_wrapper {
+			background: #fff;
+			padding: 32px;
+			border-radius: 20px;
+			border: 1px solid rgba(0, 0, 0, 0.08);
+			margin-top: 40px;
+		}
+
+		.quiz-wrapper .gform_confirmation_message {
+			font-size: 18px !important;
+			line-height: 28px !important;
+			color: #333 !important;
+			font-family: 'Inter', sans-serif !important;
+		}
+
+		.quiz-wrapper #gquiz_confirmation_message {
+			font-size: 18px !important;
+			line-height: 28px !important;
+			color: #333 !important;
+			font-family: 'Inter', sans-serif !important;
+		}
+
+		.quiz-wrapper #gquiz-entry-detail-score-info,
+		.quiz-wrapper .gquiz-score,
+		.quiz-wrapper .gquiz-total-score {
+			font-size: 20px !important;
+			line-height: 28px !important;
+			color: #000 !important;
+			font-family: 'Inter', sans-serif !important;
+			font-weight: 600 !important;
+			margin: 10px 0 !important;
+		}
+
+		.quiz-wrapper .gquiz-field-label {
+			font-size: 18px !important;
+			line-height: 26px !important;
+			color: #333 !important;
+			font-family: 'Inter', sans-serif !important;
+			font-weight: 500 !important;
+		}
+
+		.quiz-wrapper .gquiz-field-choice {
+			font-size: 16px !important;
+			line-height: 24px !important;
+			color: #555 !important;
+			font-family: 'Inter', sans-serif !important;
+		}
+
+		@keyframes skeleton-loading {
+			0% {
+				background-position: 200% 0;
+			}
+			100% {
+				background-position: -200% 0;
+			}
+		}
+
+		.quiz-wrapper .quiz-skeleton-loader {
+			margin-top: 40px;
+		}
+
+		.quiz-wrapper .quiz-form-container,
+		.quiz-wrapper .quiz-results-container {
+			margin-top: 40px;
+		}
+
+		.quiz-wrapper .gform_title {
+			font-family: "Roboto", sans-serif !important;
+			font-size: 32px !important;
+			font-weight: 500 !important;
+			line-height: 40px !important;
+			color: #000 !important;
+		}
+
+		.quiz-wrapper .gf_progressbar_title {
+			position: absolute;
+			top: 40px;
+			right: 40px;
+			font-family: "Roboto", sans-serif !important;
+			font-size: 32px !important;
+			font-weight: 500 !important;
+			line-height: 40px !important;
+			color: #000 !important;
+		}
+
+		.quiz-wrapper .gf_step_page_count_total {
+			color: rgba(0, 0, 0, 0.54) !important;
+		}
+
+		@media (max-width: 768px) {
+			.quiz-wrapper .gform_wrapper {
+				padding: 18px;
+			}
+
+			.quiz-wrapper .gf_progressbar_title {
+				top: 18px;
+				right: 18px;
+				font-size: 14px !important;
+				line-height: 20px !important;
+			}
+
+			.quiz-wrapper .gravity-theme .gfield_label {
+				font-size: 14px !important;
+			}
+
+			.quiz-wrapper .gform_title {
+				font-size: 20px !important;
+				line-height: 20px !important;
+			}
+
+			.quiz-wrapper .gform_confirmation_wrapper {
+				padding: 18px;
+			}
+
+			.quiz-wrapper .gfield_label {
+				font-size: 18px;
+			}
+
+			.quiz-wrapper .gchoice label {
+				padding: 16px 15px;
+				font-size: 12px;
+				border-radius: 10px !important;
+			}
+
+			.quiz-wrapper .ginput_container_select select,
+			.quiz-wrapper .gfield_select select {
+				padding: 12px 16px;
+				padding-right: 45px;
+				font-size: 14px;
+			}
+
+			.quiz-wrapper .gform_confirmation_message,
+			.quiz-wrapper #gquiz_confirmation_message {
+				font-size: 16px !important;
+				line-height: 24px !important;
+			}
+
+			.quiz-wrapper #gquiz-entry-detail-score-info,
+			.quiz-wrapper .gquiz-score,
+			.quiz-wrapper .gquiz-total-score {
+				font-size: 18px !important;
+				line-height: 24px !important;
+			}
+
+			.quiz-wrapper .gfield_radio label {
+				padding-left: 44px;
+			}
+
+			.quiz-wrapper .gfield_radio input[type="radio"] {
+				left: 15px;
+			}
+		}
+	</style>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const quizWrapper = document.querySelector('.quiz-wrapper');
+			if (!quizWrapper) return;
+
+			const formId = quizWrapper.getAttribute('data-form-id');
+			const userEmail = quizWrapper.getAttribute('data-user-email');
+			const skeletonLoader = quizWrapper.querySelector('.quiz-skeleton-loader');
+			const formContainer = quizWrapper.querySelector('.quiz-form-container');
+			const resultsContainer = quizWrapper.querySelector('.quiz-results-container');
+
+			function showSkeleton() {
+				if (skeletonLoader) skeletonLoader.style.display = 'block';
+				if (formContainer) formContainer.style.display = 'none';
+				if (resultsContainer) resultsContainer.style.display = 'none';
+			}
+
+			function hideSkeleton() {
+				if (skeletonLoader) skeletonLoader.style.display = 'none';
+			}
+
+			function showForm() {
+				hideSkeleton();
+				if (formContainer) formContainer.style.display = 'block';
+				if (resultsContainer) resultsContainer.style.display = 'none';
+			}
+
+			function showResults() {
+				hideSkeleton();
+				if (formContainer) formContainer.style.display = 'none';
+				if (resultsContainer) resultsContainer.style.display = 'block';
+			}
+
+			function checkUserEntry() {
+				console.log('Checking user entry:', { formId: formId, userEmail: userEmail });
+				
+				if (!formId || !userEmail) {
+					console.log('Missing formId or userEmail, showing form');
+					showForm();
+					return;
+				}
+
+				showSkeleton();
+
+				if (typeof jQuery !== 'undefined') {
+					jQuery.ajax({
+						url: '<?php echo admin_url('admin-ajax.php'); ?>',
+						type: 'POST',
+						data: {
+							action: 'check_quiz_entry',
+							form_id: formId,
+							user_email: userEmail,
+							nonce: '<?php echo wp_create_nonce('check_quiz_entry_nonce'); ?>'
+						},
+						success: function(response) {
+							console.log('AJAX response:', response);
+							if (response.success && response.data && response.data.has_entry) {
+								console.log('Entry found, loading results for entry ID:', response.data.entry_id);
+								loadQuizResults(response.data.entry_id);
+							} else {
+								console.log('No entry found, showing form');
+								showForm();
+							}
+						},
+						error: function(xhr, status, error) {
+							console.error('AJAX error:', { xhr: xhr, status: status, error: error });
+							showForm();
+						}
+					});
+				} else {
+					console.log('jQuery not available, showing form after delay');
+					setTimeout(function() {
+						showForm();
+					}, 500);
+				}
+			}
+
+			function loadQuizResults(entryId) {
+				if (typeof jQuery !== 'undefined') {
+					jQuery.ajax({
+						url: '<?php echo admin_url('admin-ajax.php'); ?>',
+						type: 'POST',
+						data: {
+							action: 'get_quiz_results',
+							form_id: formId,
+							entry_id: entryId,
+							nonce: '<?php echo wp_create_nonce('get_quiz_results_nonce'); ?>'
+						},
+						success: function(response) {
+							if (response.success && response.data.html) {
+								if (resultsContainer) {
+									resultsContainer.innerHTML = response.data.html;
+									showResults();
+								} else {
+									showForm();
+								}
+							} else {
+								showForm();
+							}
+						},
+						error: function() {
+							showForm();
+						}
+					});
+				} else {
+					showForm();
+				}
+			}
+
+			function formatProgressBarTitle() {
+				const progressBarTitle = quizWrapper.querySelector('.gf_progressbar_title');
+				if (!progressBarTitle) return;
+
+				const currentPageSpan = progressBarTitle.querySelector('.gf_step_current_page');
+				const pageCountSpan = progressBarTitle.querySelector('.gf_step_page_count');
+
+				if (currentPageSpan && pageCountSpan) {
+					const currentPage = currentPageSpan.textContent.trim();
+					const pageCount = pageCountSpan.textContent.trim();
+					
+					progressBarTitle.innerHTML = currentPage + '/<span class="gf_step_page_count_total">' + pageCount + '</span>';
+				}
+			}
+
+			formatProgressBarTitle();
+
+			if (typeof jQuery !== 'undefined') {
+				jQuery(document).on('gform_page_loaded', function() {
+					setTimeout(formatProgressBarTitle, 100);
+				});
+			}
+
+			checkUserEntry();
+
+			if (typeof jQuery !== 'undefined') {
+				jQuery(document).on('gform_confirmation_loaded', function(event, formId) {
+					if (formId == quizWrapper.getAttribute('data-form-id')) {
+						setTimeout(function() {
+							checkUserEntry();
+						}, 1000);
+					}
+				});
+			}
+
+			const originalShowForm = showForm;
+			showForm = function() {
+				originalShowForm();
+				setTimeout(formatProgressBarTitle, 200);
+			};
+		});
+	</script>
+
 	<div class="info-block py-[38px] px-4">
 		<div class="author">
 		<?php
@@ -335,6 +944,53 @@ tutor_load_template(
 
 		</div>
 	</div>
+	<!-- QUIZ -->
+	<?php 
+		$quiz_shortcode = get_field('quiz_shortcode', $course_content_id);
+		if($quiz_shortcode){ 
+			$form_id = 0;
+			
+			if (preg_match('/id=["\']?(\d+)["\']?/', $quiz_shortcode, $form_id_match)) {
+				$form_id = intval($form_id_match[1]);
+			}
+			elseif (preg_match('/gravityforms.*id=["\']?(\d+)["\']?/', $quiz_shortcode, $form_id_match)) {
+				$form_id = intval($form_id_match[1]);
+			}
+			elseif (preg_match('/(\d+)/', $quiz_shortcode, $form_id_match)) {
+				$form_id = intval($form_id_match[1]);
+			}
+			
+			$user_email = '';
+			if (is_user_logged_in()) {
+				$current_user = wp_get_current_user();
+				$user_email = $current_user->user_email;
+			}
+			
+			?>
+			<div class="quiz-wrapper" data-form-id="<?php echo esc_attr($form_id); ?>" data-user-email="<?php echo esc_attr($user_email); ?>">
+				<div class="quiz-skeleton-loader">
+					<div class="skeleton-card" style="background: #fff; padding: 32px; border-radius: 20px; border: 1px solid rgba(0, 0, 0, 0.08);">
+						<div class="skeleton-title" style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s ease-in-out infinite; border-radius: 4px; margin-bottom: 20px; width: 60%;"></div>
+						<div class="skeleton-option" style="height: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s ease-in-out infinite; border-radius: 12px; margin-bottom: 12px;"></div>
+						<div class="skeleton-option" style="height: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s ease-in-out infinite; border-radius: 12px; margin-bottom: 12px;"></div>
+						<div class="skeleton-option" style="height: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s ease-in-out infinite; border-radius: 12px; margin-bottom: 12px;"></div>
+						<div class="skeleton-button" style="height: 50px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s ease-in-out infinite; border-radius: 150px; margin-top: 30px; width: 200px; margin-left: auto;"></div>
+					</div>
+				</div>
+				
+				<!-- Quiz Form Container -->
+				<div class="quiz-form-container" style="display: none;">
+					<?php echo do_shortcode($quiz_shortcode); ?>
+				</div>
+				
+				<!-- Quiz Results Container -->
+				<div class="quiz-results-container" style="display: none;">
+					<!-- Results will be loaded via AJAX -->
+				</div>
+			</div>
+		<?php }
+	?>
+	<!-- QUIZ END -->
 </div>
 
 <?php tutor_load_template( 'single.common.footer', array( 'course_id' => $course_id ) ); ?>
