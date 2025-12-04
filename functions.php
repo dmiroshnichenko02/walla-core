@@ -187,17 +187,9 @@ function tutor_mark_lesson_complete_handler() {
 }
 
 function walla_set_single_course_as_front_page() {
-    $course = get_posts([
-        'post_type'      => 'courses', 
-        'posts_per_page' => 1,
-        'post_status'    => 'publish',
-    ]);
-    if (!empty($course)) {
-        $course_id = $course[0]->ID;
-        // Устанавливаем эту страницу как главную
-        update_option('show_on_front', 'page');
-        update_option('page_on_front', $course_id);
-    }
+    $course_id = get_field('walla_front_page_course', 'options');
+    update_option('show_on_front', 'page');
+    update_option('page_on_front', $course_id[0]);
 }
 add_action('init', 'walla_set_single_course_as_front_page');
 
