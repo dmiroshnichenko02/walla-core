@@ -142,7 +142,7 @@ function walla_collect_lesson_data( $lesson_id ) {
 
 
 function walla_send_course_data_to_api( $json_data ) {
-	$api_url = 'http://localhost:8000/courses/sync';
+	$api_url = 'https://ai.walla.academy/courses/sync';
 	
 	$response = wp_remote_post( $api_url, array(
 		'method'      => 'POST',
