@@ -840,3 +840,88 @@ function walla_get_quiz_results() {
 		'html' => $confirmation
 	));
 }
+
+add_action('wp_ajax_walla_ask_course_question', 'walla_ask_course_question');
+add_action('wp_ajax_nopriv_walla_ask_course_question', 'walla_ask_course_question');
+
+function walla_ask_course_question() {
+	if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'walla_ask_question_nonce')) {
+		wp_send_json_error(array('message' => 'Invalid nonce'));
+		return;
+	}
+
+	$course_id = isset($_POST['course_id']) ? intval($_POST['course_id']) : 0;
+	$lesson_id = isset($_POST['lesson_id']) ? intval($_POST['lesson_id']) : 0;
+	$question = isset($_POST['question']) ? sanitize_text_field($_POST['question']) : '';
+
+	if (empty($course_id) || empty($question)) {
+		wp_send_json_error(array('message' => 'Missing required parameters'));
+		return;
+	}
+
+	$request_body = array(
+		'course_id' => (string) $course_id,
+		'lesson_id' => (string) $lesson_id,
+		'question' => $question
+	);
+
+	$api_url = get_field('ai_api_endpoint', 'option');
+	if (empty($api_url)) {
+		$api_url = 'https://ai.walla.academy/chat/course';
+	}
+
+	$response = wp_remote_post($api_url, array(
+		'timeout' => 30,
+		'headers' => array(
+			'Content-Type' => 'application/json',
+		),
+		'body' => json_encode($request_body),
+	));
+
+	if (is_wp_error($response)) {
+		wp_send_json_error(array(
+			'message' => 'API request failed: ' . $response->get_error_message()
+		));
+		return;
+	}
+
+	$response_code = wp_remote_retrieve_response_code($response);
+	$response_body = wp_remote_retrieve_body($response);
+	$response_data = json_decode($response_body, true);
+
+	if ($response_code !== 200) {
+		$error_message = 'API request failed';
+		
+		if (isset($response_data['detail'])) {
+			$error_message = $response_data['detail'];
+		} elseif (isset($response_data['message'])) {
+			$error_message = $response_data['message'];
+		} elseif (isset($response_data['error'])) {
+			$error_message = is_array($response_data['error']) && isset($response_data['error']['message']) 
+				? $response_data['error']['message'] 
+				: (is_string($response_data['error']) ? $response_data['error'] : $error_message);
+		}
+		
+		wp_send_json_error(array(
+			'message' => $error_message,
+			'code' => $response_code,
+			'response' => $response_data
+		));
+		return;
+	}
+
+	if (!isset($response_data['answer'])) {
+		wp_send_json_error(array(
+			'message' => 'Invalid API response format',
+			'response' => $response_data
+		));
+		return;
+	}
+
+	wp_send_json_success(array(
+		'answer' => $response_data['answer'],
+		'source' => isset($response_data['source']) ? $response_data['source'] : 'course',
+		'course_id' => isset($response_data['course_id']) ? $response_data['course_id'] : $course_id,
+		'lesson_id' => isset($response_data['lesson_id']) ? $response_data['lesson_id'] : $lesson_id
+	));
+}

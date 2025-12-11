@@ -1089,7 +1089,7 @@ if ( $can_review && ! $has_my_review ) {
 		</svg>
 	</div>
 
-	<div class="walla-chat fixed bottom-[130px] right-[20px] w-full max-w-[420px] rounded-[20px] overflow-hidden transition-all duration-300 opacity-0 translate-y-5 pointer-events-none" style="background-color: <?php echo esc_attr($chat_background); ?>; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+	<div class="walla-chat fixed bottom-[130px] right-[20px] w-full max-w-[420px] rounded-[20px] overflow-hidden transition-all duration-300 opacity-0 translate-y-5 pointer-events-none" style="background-color: <?php echo esc_attr($chat_background); ?>; box-shadow: 0 20px 60px rgba(0,0,0,0.3);" data-course-id="<?php echo esc_attr($course_id); ?>" data-lesson-id="<?php echo esc_attr($course_content_id); ?>">
 		<div class="walla-chat-header flex items-center justify-between px-4 py-3" style="background-color: <?php echo esc_attr($header_background); ?>;">
 			<div class="flex items-center gap-3 flex-1 min-w-0">
 				<button class="walla-back-btn flex-shrink-0 p-1 cursor-pointer transition-opacity hover:opacity-70" style="color: <?php echo esc_attr($back_button_color); ?>;">
@@ -1292,6 +1292,14 @@ document.addEventListener("DOMContentLoaded", function() {
 	const sendForm = document.querySelector('.walla-send-form');
 	const input = sendForm ? sendForm.querySelector('.walla-input') : null;
 	
+	// Get course and lesson IDs
+	const courseId = chat ? chat.getAttribute('data-course-id') : null;
+	const lessonId = chat ? chat.getAttribute('data-lesson-id') : null;
+	
+	// Chat history storage key
+	const CHAT_HISTORY_KEY = 'walla_chat_history_' + (courseId || 'default');
+	const CHAT_HISTORY_EXPIRY_HOURS = 7;
+	
 	let isChatOpen = false;
 	let dateUpdateInterval = null;
 	const chatOpenedTime = new Date();
@@ -1390,7 +1398,74 @@ document.addEventListener("DOMContentLoaded", function() {
 		type();
 	}
 	
-	function addUserMessage(text) {
+	// Chat history management
+	function getChatHistory() {
+		try {
+			const stored = localStorage.getItem(CHAT_HISTORY_KEY);
+			if (!stored) return [];
+			
+			const history = JSON.parse(stored);
+			const now = Date.now();
+			const expiryTime = CHAT_HISTORY_EXPIRY_HOURS * 60 * 60 * 1000;
+			
+			// Filter out expired messages
+			const validHistory = history.filter(function(msg) {
+				return (now - msg.timestamp) < expiryTime;
+			});
+			
+			// Save cleaned history
+			if (validHistory.length !== history.length) {
+				saveChatHistory(validHistory);
+			}
+			
+			return validHistory;
+		} catch (e) {
+			console.error('Error loading chat history:', e);
+			return [];
+		}
+	}
+	
+	function saveChatHistory(history) {
+		try {
+			localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
+		} catch (e) {
+			console.error('Error saving chat history:', e);
+		}
+	}
+	
+	function addMessageToHistory(type, text, timestamp) {
+		const history = getChatHistory();
+		history.push({
+			type: type, // 'user' or 'bot'
+			text: text,
+			timestamp: timestamp || Date.now()
+		});
+		saveChatHistory(history);
+	}
+	
+	function loadChatHistory() {
+		const history = getChatHistory();
+		if (history.length === 0) return;
+		
+		// Clear welcome message if we have history
+		const welcomeMsg = messagesContainer.querySelector('.walla-bot-message');
+		if (welcomeMsg && history.length > 0) {
+			welcomeMsg.remove();
+		}
+		
+		// Load messages from history
+		history.forEach(function(msg) {
+			if (msg.type === 'user') {
+				renderUserMessage(msg.text, msg.timestamp);
+			} else if (msg.type === 'bot') {
+				renderBotMessage(msg.text, msg.timestamp);
+			}
+		});
+		
+		scrollToBottom();
+	}
+	
+	function renderUserMessage(text, timestamp) {
 		if (!messagesContainer) return;
 		
 		const userMessageBg = '<?php echo esc_js($user_message_background); ?>';
@@ -1403,25 +1478,183 @@ document.addEventListener("DOMContentLoaded", function() {
 		const contentDiv = document.createElement('div');
 		contentDiv.className = 'walla-message-content';
 		contentDiv.style.cssText = 'background-color: ' + userMessageBg + '; color: ' + messageTextColor + '; padding: 12px 16px; border-radius: 18px; border-top-right-radius: 0; max-width: 85%; display: inline-block; text-align: right;';
+		contentDiv.textContent = text;
 		
 		const labelDiv = document.createElement('div');
 		labelDiv.className = 'walla-message-label mt-1 text-xs px-1';
 		labelDiv.style.cssText = 'color: ' + labelColor + '; text-align: right;';
-		labelDiv.innerHTML = 'You • <span class="user-time">Just now</span>';
+		const msgTime = timestamp ? new Date(timestamp) : new Date();
+		labelDiv.innerHTML = 'You • <span class="user-time">' + formatTime(msgTime) + '</span>';
+		
+		messageDiv.appendChild(contentDiv);
+		messageDiv.appendChild(labelDiv);
+		messagesContainer.appendChild(messageDiv);
+	}
+	
+	function renderBotMessage(text, timestamp, animate) {
+		if (!messagesContainer) return;
+		
+		const messageBackground = '<?php echo esc_js($message_background); ?>';
+		const messageTextColor = '<?php echo esc_js($message_text_color); ?>';
+		const labelColor = '<?php echo esc_js($label_color); ?>';
+		const welcomeMessageLabel = '<?php echo esc_js($welcome_message_label ?: 'AI Agent'); ?>';
+		
+		const messageDiv = document.createElement('div');
+		messageDiv.className = 'walla-message walla-bot-message mb-4';
+		
+		const contentDiv = document.createElement('div');
+		contentDiv.className = 'inline-block px-4 py-3 rounded-[18px] rounded-tl-none max-w-[85%]';
+		contentDiv.style.cssText = 'background-color: ' + messageBackground + ';';
+		
+		const textDiv = document.createElement('div');
+		textDiv.className = 'text-sm leading-relaxed';
+		textDiv.style.cssText = 'color: ' + messageTextColor + ';';
+		
+		contentDiv.appendChild(textDiv);
+		
+		const labelDiv = document.createElement('div');
+		labelDiv.className = 'mt-1 text-xs px-1';
+		labelDiv.style.cssText = 'color: ' + labelColor + ';';
+		const msgTime = timestamp ? new Date(timestamp) : new Date();
+		labelDiv.innerHTML = welcomeMessageLabel + ' • <span class="walla-time">' + formatTime(msgTime) + '</span>';
 		
 		messageDiv.appendChild(contentDiv);
 		messageDiv.appendChild(labelDiv);
 		messagesContainer.appendChild(messageDiv);
 		
-		typeText(contentDiv, text, 35, function() {
-			const userTimeEl = messageDiv.querySelector('.user-time');
-			if (userTimeEl) {
-				const msgTime = new Date();
-				userTimeEl.textContent = formatTime(msgTime);
-			}
-		});
+		if (animate) {
+			typeText(textDiv, text, 35, function() {
+				scrollToBottom();
+			});
+			// Scroll during typing
+			const scrollInterval = setInterval(function() {
+				scrollToBottom();
+				if (textDiv.textContent === text) {
+					clearInterval(scrollInterval);
+				}
+			}, 100);
+		} else {
+			textDiv.textContent = text;
+			scrollToBottom();
+		}
+	}
+	
+	function addUserMessage(text) {
+		if (!messagesContainer) return;
 		
+		const timestamp = Date.now();
+		renderUserMessage(text, timestamp);
+		addMessageToHistory('user', text, timestamp);
 		scrollToBottom();
+		
+		// Remove welcome message if it exists
+		const welcomeMsg = messagesContainer.querySelector('.walla-bot-message:first-child');
+		if (welcomeMsg && welcomeMsg.querySelector('.walla-welcome-message-text')) {
+			welcomeMsg.remove();
+		}
+		
+		// Ask AI
+		askAIQuestion(text);
+	}
+	
+	function askAIQuestion(question) {
+		if (!courseId || !question) return;
+		
+		// Show loading indicator
+		const loadingDiv = document.createElement('div');
+		loadingDiv.className = 'walla-message walla-bot-message mb-4 walla-loading';
+		loadingDiv.innerHTML = '<div class="inline-block px-4 py-3 rounded-[18px] rounded-tl-none" style="background-color: <?php echo esc_js($message_background); ?>;"><div class="text-sm" style="color: <?php echo esc_js($message_text_color); ?>;">Thinking...</div></div>';
+		messagesContainer.appendChild(loadingDiv);
+		scrollToBottom();
+		
+		// Make AJAX request
+		if (typeof jQuery !== 'undefined') {
+			jQuery.ajax({
+				url: '<?php echo admin_url('admin-ajax.php'); ?>',
+				type: 'POST',
+				data: {
+					action: 'walla_ask_course_question',
+					course_id: courseId,
+					lesson_id: lessonId || '',
+					question: question,
+					nonce: '<?php echo wp_create_nonce('walla_ask_question_nonce'); ?>'
+				},
+				success: function(response) {
+					// Remove loading indicator
+					const loading = messagesContainer.querySelector('.walla-loading');
+					if (loading) {
+						loading.remove();
+					}
+					
+					if (response.success && response.data && response.data.answer) {
+						const timestamp = Date.now();
+						renderBotMessage(response.data.answer, timestamp, true);
+						addMessageToHistory('bot', response.data.answer, timestamp);
+					} else {
+						const errorMsg = response.data && response.data.message ? response.data.message : 'Sorry, I could not process your question. Please try again.';
+						const timestamp = Date.now();
+						renderBotMessage(errorMsg, timestamp, true);
+						addMessageToHistory('bot', errorMsg, timestamp);
+					}
+				},
+				error: function(xhr, status, error) {
+					// Remove loading indicator
+					const loading = messagesContainer.querySelector('.walla-loading');
+					if (loading) {
+						loading.remove();
+					}
+					
+					const errorMsg = 'Sorry, there was an error processing your question. Please try again.';
+					const timestamp = Date.now();
+					renderBotMessage(errorMsg, timestamp, true);
+					addMessageToHistory('bot', errorMsg, timestamp);
+				}
+			});
+		} else {
+			// Fallback if jQuery is not available
+			fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: new URLSearchParams({
+					action: 'walla_ask_course_question',
+					course_id: courseId,
+					lesson_id: lessonId || '',
+					question: question,
+					nonce: '<?php echo wp_create_nonce('walla_ask_question_nonce'); ?>'
+				})
+			})
+			.then(response => response.json())
+			.then(data => {
+				const loading = messagesContainer.querySelector('.walla-loading');
+				if (loading) {
+					loading.remove();
+				}
+				
+				if (data.success && data.data && data.data.answer) {
+					const timestamp = Date.now();
+					renderBotMessage(data.data.answer, timestamp, true);
+					addMessageToHistory('bot', data.data.answer, timestamp);
+				} else {
+					const errorMsg = data.data && data.data.message ? data.data.message : 'Sorry, I could not process your question. Please try again.';
+					const timestamp = Date.now();
+					renderBotMessage(errorMsg, timestamp, true);
+					addMessageToHistory('bot', errorMsg, timestamp);
+				}
+			})
+			.catch(error => {
+				const loading = messagesContainer.querySelector('.walla-loading');
+				if (loading) {
+					loading.remove();
+				}
+				
+				const errorMsg = 'Sorry, there was an error processing your question. Please try again.';
+				const timestamp = Date.now();
+				renderBotMessage(errorMsg, timestamp, true);
+				addMessageToHistory('bot', errorMsg, timestamp);
+			});
+		}
 	}
 	
 	function openChat() {
@@ -1439,13 +1672,20 @@ document.addEventListener("DOMContentLoaded", function() {
 				chat.classList.add('show');
 				startTimeUpdater();
 				
-				const welcomeMessageEl = document.querySelector('.walla-welcome-message-text');
-				if (welcomeMessageEl) {
-					const fullText = welcomeMessageEl.getAttribute('data-full-text') || '';
-					if (fullText) {
-						setTimeout(function() {
-							typeText(welcomeMessageEl, fullText, 35);
-						}, 300);
+				// Load chat history
+				const history = getChatHistory();
+				if (history.length > 0) {
+					loadChatHistory();
+				} else {
+					// Show welcome message only if no history
+					const welcomeMessageEl = document.querySelector('.walla-welcome-message-text');
+					if (welcomeMessageEl) {
+						const fullText = welcomeMessageEl.getAttribute('data-full-text') || '';
+						if (fullText) {
+							setTimeout(function() {
+								typeText(welcomeMessageEl, fullText, 35);
+							}, 300);
+						}
 					}
 				}
 				
