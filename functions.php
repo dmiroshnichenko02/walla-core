@@ -925,3 +925,131 @@ function walla_ask_course_question() {
 		'lesson_id' => isset($response_data['lesson_id']) ? $response_data['lesson_id'] : $lesson_id
 	));
 }
+
+// GF
+
+add_filter('gform_form_settings_fields', function ($fields, $form) {
+    $tags = is_array($form) ? ($form['tags'] ?? '') : ($form->tags ?? '');
+    if (is_array($tags)) {
+        $tags = implode(', ', $tags);
+    }
+    $tags = is_string($tags) ? $tags : '';
+    
+    $fields['form_tags'] = [
+        'title'  => 'Form Tags',
+        'fields' => [
+            [
+                'name'    => 'tags',
+                'label'   => 'Tags',
+                'type'    => 'text',
+                'tooltip' => 'Enter tags separated by commas. These tags can be used to search and filter forms.',
+            ],
+        ],
+    ];
+    return $fields;
+}, 10, 2);
+
+add_filter('gform_form_settings_initial_values', function ($initial_values, $form) {
+    $tags = is_array($form) ? ($form['tags'] ?? '') : ($form->tags ?? '');
+    if (is_array($tags)) {
+        $tags = implode(', ', $tags);
+    }
+    $tags = is_string($tags) ? $tags : '';
+    $initial_values['tags'] = $tags;
+    return $initial_values;
+}, 10, 2);
+
+add_filter('gform_pre_form_settings_save', function ($form) {
+    if (isset($_POST['_gform_setting_tags'])) {
+        $tags = sanitize_text_field($_POST['_gform_setting_tags']);
+        $tags = trim($tags);
+        $form['tags'] = $tags;
+    } elseif (isset($form['tags']) && is_array($form['tags'])) {
+        $form['tags'] = implode(', ', array_filter($form['tags']));
+    }
+    return $form;
+});
+
+add_filter('gform_form_list_columns', function ($columns) {
+    $columns['tags'] = 'Tags';
+    return $columns;
+});
+
+add_action('gform_form_list_column_tags', function ($form) {
+    $form_id = is_object($form) ? $form->id : (is_array($form) ? $form['id'] : 0);
+    
+    if (!$form_id) {
+        echo '<span style="color: #999;">—</span>';
+        return;
+    }
+    
+    $full_form = GFAPI::get_form($form_id);
+    if (!$full_form || is_wp_error($full_form)) {
+        echo '<span style="color: #999;">—</span>';
+        return;
+    }
+    
+    $tags = $full_form['tags'] ?? '';
+    
+    if (is_array($tags)) {
+        $tags = implode(', ', array_filter($tags));
+    }
+    
+    if (!empty($tags)) {
+        $tags = trim($tags);
+        $tags_array = array_map('trim', explode(',', $tags));
+        $tags_array = array_filter($tags_array);
+        echo esc_html(implode(', ', $tags_array));
+    } else {
+        echo '<span style="color: #999;">—</span>';
+    }
+});
+
+add_filter('gform_form_list_forms', function ($forms, $search_query, $active, $sort_column, $sort_direction, $trash) {
+    if (empty($search_query)) {
+        return $forms;
+    }
+
+    $existing_ids = [];
+    foreach ($forms as $form) {
+        $existing_ids[] = is_object($form) ? $form->id : (is_array($form) ? $form['id'] : 0);
+    }
+
+    $all_forms_db = GFFormsModel::get_forms($active, $sort_column, $sort_direction, $trash);
+    $matched_by_tags = [];
+
+    foreach ($all_forms_db as $form_obj) {
+        if (in_array($form_obj->id, $existing_ids)) {
+            continue;
+        }
+
+        $full_form = GFAPI::get_form($form_obj->id);
+        if (!$full_form || is_wp_error($full_form)) {
+            continue;
+        }
+
+        $tags = $full_form['tags'] ?? '';
+        
+        if (is_array($tags)) {
+            $tags = implode(', ', $tags);
+        }
+        
+        if (!empty($tags)) {
+            $tags = trim($tags);
+            $tags_array = array_map('trim', explode(',', $tags));
+            
+            foreach ($tags_array as $tag) {
+                if (stripos($tag, $search_query) !== false) {
+                    $matched_by_tags[] = $form_obj;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!empty($matched_by_tags)) {
+        $forms = array_merge($forms, $matched_by_tags);
+    }
+
+    return $forms;
+}, 10, 6);

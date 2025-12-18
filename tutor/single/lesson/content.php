@@ -946,19 +946,10 @@ tutor_load_template(
 	</div>
 	<!-- QUIZ -->
 	<?php 
-		$quiz_shortcode = get_field('quiz_shortcode', $course_content_id);
-		if($quiz_shortcode){ 
-			$form_id = 0;
-			
-			if (preg_match('/id=["\']?(\d+)["\']?/', $quiz_shortcode, $form_id_match)) {
-				$form_id = intval($form_id_match[1]);
-			}
-			elseif (preg_match('/gravityforms.*id=["\']?(\d+)["\']?/', $quiz_shortcode, $form_id_match)) {
-				$form_id = intval($form_id_match[1]);
-			}
-			elseif (preg_match('/(\d+)/', $quiz_shortcode, $form_id_match)) {
-				$form_id = intval($form_id_match[1]);
-			}
+		$quiz_id = get_field('quiz_shortcode', $course_content_id);
+		if($quiz_id){ 
+			$form_id = intval($quiz_id);
+			$quiz_shortcode = '[gravityform id="' . $form_id . '" title="true" ajax="true"]';
 			
 			$user_email = '';
 			if (is_user_logged_in()) {
