@@ -1053,3 +1053,129 @@ add_filter('gform_form_list_forms', function ($forms, $search_query, $active, $s
 
     return $forms;
 }, 10, 6);
+
+add_filter('acf-gravityforms-add-on/field_html', function ($field_html, $field, $field_options, $multiple) {
+    if (empty($field_html)) {
+        return $field_html;
+    }
+    
+    $fieldId = str_replace(['[', ']'], ['-', ''], $field['name']);
+    
+    $forms = GFAPI::get_forms(true, false, 'title');
+    $forms_data = [];
+    
+    foreach ($forms as $form) {
+        $tags = $form['tags'] ?? '';
+        if (is_array($tags)) {
+            $tags = implode(', ', $tags);
+        }
+        $tags = trim($tags);
+        
+        $forms_data[$form['id']] = [
+            'title' => $form['title'],
+            'tags' => $tags
+        ];
+    }
+    
+    $forms_json = wp_json_encode($forms_data);
+    
+    $field_html = str_replace(
+        '<select id="' . $fieldId . '"',
+        '<select id="' . $fieldId . '" data-forms-data="' . esc_attr($forms_json) . '" class="acf-gravityforms-select"',
+        $field_html
+    );
+    
+    return $field_html;
+}, 10, 4);
+
+add_action('acf/input/admin_enqueue_scripts', function() {
+    if (function_exists('acf_get_setting') && acf_get_setting('enqueue_select2')) {
+        wp_enqueue_script('select2');
+        wp_enqueue_style('select2');
+    }
+    
+    wp_add_inline_script('jquery', '
+        (function($) {
+            function initGravityFormsSelect() {
+                $(".acf-gravityforms-select").each(function() {
+                    var $select = $(this);
+                    if ($select.data("select2")) {
+                        return;
+                    }
+                    
+                    if (typeof $.fn.select2 === "undefined") {
+                        setTimeout(initGravityFormsSelect, 200);
+                        return;
+                    }
+                    
+                    var formsData = {};
+                    try {
+                        var dataAttr = $select.attr("data-forms-data");
+                        if (dataAttr) {
+                            formsData = JSON.parse(dataAttr);
+                        }
+                    } catch(e) {
+                        console.error("Error parsing forms data", e);
+                    }
+                    
+                    var selectOptions = {
+                        placeholder: "Search forms by title or tags...",
+                        allowClear: true,
+                        width: "100%",
+                        minimumResultsForSearch: 0
+                    };
+                    
+                    if (typeof $.fn.select2.amd !== "undefined") {
+                        selectOptions.matcher = function(params, data) {
+                            if (!params.term || params.term.trim() === "") {
+                                return data;
+                            }
+                            
+                            var term = params.term.toLowerCase();
+                            var text = (data.text || "").toLowerCase();
+                            var formId = data.id;
+                            
+                            if (text.indexOf(term) !== -1) {
+                                return data;
+                            }
+                            
+                            if (formsData[formId] && formsData[formId].tags) {
+                                var tags = formsData[formId].tags.toLowerCase();
+                                if (tags.indexOf(term) !== -1) {
+                                    return data;
+                                }
+                            }
+                            
+                            return null;
+                        };
+                        
+                        selectOptions.templateResult = function(data) {
+                            if (!data.id) {
+                                return data.text;
+                            }
+                            
+                            var formId = data.id;
+                            var $result = $("<span>" + (data.text || "") + "</span>");
+                            
+                            if (formsData[formId] && formsData[formId].tags) {
+                                $result.append("<span style=\"color: #999; font-size: 0.9em; margin-left: 10px;\">(" + formsData[formId].tags + ")</span>");
+                            }
+                            
+                            return $result;
+                        };
+                    }
+                    
+                    $select.select2(selectOptions);
+                });
+            }
+            
+            $(document).ready(function() {
+                setTimeout(initGravityFormsSelect, 200);
+            });
+            
+            $(document).on("acf/setup_fields", function() {
+                setTimeout(initGravityFormsSelect, 200);
+            });
+        })(jQuery);
+    ', 'after');
+});
